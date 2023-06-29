@@ -77,6 +77,7 @@ def init_record(config):
     record["weight_decay"] = config.weight_decay
 
     # initialize data record 
+    record["train_acc"] = []
     record["test_acc"] = []
     record["test_loss"] = []
 

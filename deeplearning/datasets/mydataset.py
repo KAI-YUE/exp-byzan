@@ -30,9 +30,3 @@ def fetch_dataloader(config, data, shuffle=True):
 
     return data_loader
 
-
-# def fetch_dataloader(config, data, shuffle=True):
-#     train_loader = torch.utils.data.DataLoader(data, batch_size=config.batch_size, shuffle=shuffle,
-#                                                 num_workers=4 ,pin_memory=False)
-
-#     return train_loader

@@ -10,37 +10,26 @@ seed: 309
 rounds: 100
 users: 31
 part_rate: 1
-# part_rate: 1
-# part_rate: 0.1
-
-iid: true
-# iid: false
-# alpha: 0.01
 user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
+# user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/full_map.dat"
 
 # hyperparameters and model type
-# local_batch_size: the size of the local batch
-# tau:              number of local iterations
-# rounds:           total communication rounds upper bound
-# momentum:         momentum settings for SGD  
-
 batch_size: 100
-tau: 30
+tau: 20
+
+optimizer: "Adam"
 lr: 5.e-3
-lr_scaler: 0.5
 momentum: 0
 weight_decay: 0.
-# weight_decay: 1.e-3
-# weight_decay: 0.01
 
-model: "lenet"
+model: "lenet_5"
 checkpoint_path: ""
 
 # Simulation dataset configurations
-# dataset: "fmnist"
-# data_path: "/mnt/ex-ssd/Datasets/fmnist/"
-dataset: "cifar10"
-data_path: "/mnt/ex-ssd/Datasets/cifar10/"
+dataset: "fmnist"
+data_path: "/mnt/ex-ssd/Datasets/fmnist/"
+# dataset: "cifar10"
+# data_path: "/mnt/ex-ssd/Datasets/cifar10/"
 
 sample_size:
 - 28
