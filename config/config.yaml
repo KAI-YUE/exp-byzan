@@ -1,0 +1,56 @@
+# device: "cuda" | "cpu"
+device: cuda
+seed: 309
+
+# distributed networks
+# users:            number of users
+# random_sampling:   whether or not perform random sampling before each iteration
+# sampling_fraction: the fraction of users to sample
+# alpha:             the alpha parameter of the Dirichlet distribution 
+rounds: 100
+users: 31
+part_rate: 1
+# part_rate: 1
+# part_rate: 0.1
+
+iid: true
+# iid: false
+# alpha: 0.01
+user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
+
+# hyperparameters and model type
+# local_batch_size: the size of the local batch
+# tau:              number of local iterations
+# rounds:           total communication rounds upper bound
+# momentum:         momentum settings for SGD  
+
+batch_size: 100
+tau: 30
+lr: 5.e-3
+lr_scaler: 0.5
+momentum: 0
+weight_decay: 0.
+# weight_decay: 1.e-3
+# weight_decay: 0.01
+
+model: "lenet"
+checkpoint_path: ""
+
+# Simulation dataset configurations
+# dataset: "fmnist"
+# data_path: "/mnt/ex-ssd/Datasets/fmnist/"
+dataset: "cifar10"
+data_path: "/mnt/ex-ssd/Datasets/cifar10/"
+
+sample_size:
+- 28
+- 28
+channels: 1
+classes: 10
+
+# Log configurations
+output_folder: "experiments"
+test_interval: 1
+print_every:   20
+log_level:   "INFO"
+log_file:    "./train.log"
