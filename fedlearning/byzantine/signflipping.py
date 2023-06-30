@@ -2,32 +2,14 @@ import copy
 import numpy as np
 
 from fedlearning.buffer import WeightBuffer
+from fedlearning.client import Client
 from deeplearning.datasets import fetch_dataloader
-from deeplearning.utils import init_optimizer, AverageMeter
+from deeplearning.utils import init_optimizer
 
-class Client(object):
+
+class SignflippingAttacker(Client):
     def __init__(self, config, model, **kwargs):
-        """Construct a local updater for a user.
-        """
-        self.local_model = copy.deepcopy(model)
-        self.w0 =  WeightBuffer(model.state_dict())
-        self.optimizer = init_optimizer(config, self.local_model)
-        self.tau = config.tau
-        self.device = config.device
-        self.config = config
-
-    def local_step(self):
-        pass
-
-    def uplink_transmit(self):
-        pass
-
-
-class LocalUpdater(Client):
-    def __init__(self, config, model, **kwargs):
-        """Construct a local updater for a user.
-        """
-        super(LocalUpdater, self).__init__(config, model, **kwargs)
+        super(SignflippingAttacker, self).__init__(config, model, **kwargs)
 
     def init_local_dataset(self, dataset, data_idx):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
@@ -62,9 +44,9 @@ class LocalUpdater(Client):
                     break
                 
     def uplink_transmit(self):
-        """Simulate the transmission of local gradients to the central server.
+        """Simulate the transmission of local gradients with flipped signs.
         """ 
         w_tau = WeightBuffer(self.local_model.state_dict())
-        delta = self.w0 - w_tau
+        delta = w_tau - self.w0
 
         return delta

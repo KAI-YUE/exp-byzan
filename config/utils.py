@@ -56,12 +56,8 @@ def init_outputfolder(config):
     return output_dir
 
 
-def save_record(config, record):
-    current_path = os.path.dirname(__file__)
-    current_time = datetime.datetime.now()
-    current_time_str = datetime.datetime.strftime(current_time ,'%H_%M_%S')
-    file_name = config.record_dir.format(current_time_str)
-    with open(os.path.join(current_path, file_name), "wb") as fp:
+def save_record(record, output_dir):
+    with open(os.path.join(output_dir, "record.dat"), "wb") as fp:
         pickle.dump(record, fp)
 
 def count_parameters(model):

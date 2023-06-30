@@ -1,7 +1,4 @@
-import os
-import pickle
 import time
-import numpy as np
 
 # PyTorch libraries
 import torch
@@ -12,7 +9,7 @@ from deeplearning.utils import *
 from deeplearning.datasets import *
 from deeplearning.dataset import *
 from fedlearning import *
-
+from fedlearning.aggregators import BenignFedAvg
 
 def federated_learning(config, logger, record):
     """Simulate Federated Learning training process. 
@@ -23,28 +20,41 @@ def federated_learning(config, logger, record):
         record (dict):           a record for train info saving.  
     """
 
+    # initialize the dataset and dataloader for training and testing 
     dataset = fetch_dataset(config)
     dummy_train_loader = fetch_dataloader(config, dataset.dst_train)
     test_loader = fetch_dataloader(config, dataset.dst_test)
-    model, criterion, user_ids,  user_data_mapping, start_round = init_all(config, dataset, logger)
+    model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
+
+    # initialize the byzantine model
+    ByzantineUpdater = init_attacker(config)
 
     global_updater = GlobalUpdater(config)
+    fedavg_oracle = BenignFedAvg(num_users=config.total_users - config.num_attackers)
     best_testacc = 0.
 
     for comm_round in range(start_round, config.rounds):
-        local_packages = {}
+        benign_packages = {}
         for i, user_id in enumerate(user_ids):
-            updater = LocalUpdater(config, model, dataset, user_data_mapping[user_id])
+            updater = LocalUpdater(config, model)
+            updater.init_local_dataset(dataset, user_data_mapping[user_id])
             updater.local_step(criterion)
 
             local_package = updater.uplink_transmit()
-            local_packages[user_id] = local_package
-            
-            # logger.info("User {} has finished local training".format(user_id))
-            # validate_and_log(config, updater.local_model, dummy_train_loader, test_loader, criterion, comm_round, best_testacc, logger, record)
+            benign_packages[user_id] = local_package
+
+        oracle = fedavg_oracle(benign_packages)
+        attacker_packages = {}
+        for i, attacker_id in enumerate(attacker_ids):
+            updater = ByzantineUpdater(config, model)
+            updater.init_local_dataset(dataset, user_data_mapping[user_id])
+            updater.local_step(criterion, oracle=oracle)
+
+            attacker_package = updater.uplink_transmit()
+            attacker_packages[attacker_id] = attacker_package
 
         # Update the global model
-        global_updater.global_step(model, local_packages, record=record)
+        global_updater.global_step(model, benign_packages, attacker_packages, record=record)
 
         # Validate the model performance and log
         best_testacc = validate_and_log(config, model, dummy_train_loader, test_loader, criterion, comm_round, best_testacc, logger, record)
@@ -64,7 +74,7 @@ def main():
     end = time.time()
 
     logger.info("{:.3} mins has elapsed".format((end-start)/60))
-    save_record(config, record)
+    save_record(record, output_dir)
 
 if __name__ == "__main__":
     main()

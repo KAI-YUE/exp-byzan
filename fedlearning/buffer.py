@@ -1,5 +1,4 @@
 import copy
-from collections import OrderedDict
 
 # PyTorch Libraries
 import torch
@@ -42,3 +41,12 @@ class WeightBuffer(object):
     def state_dict(self):
         return self._weight_dict
 
+
+def _get_para(state_dict) -> torch.Tensor:
+    # flat concatenation of all parameters
+    layer_parameters = []
+
+    for name, param in state_dict.items():      
+        layer_parameters.append(param.data.view(-1))
+
+    return torch.cat(layer_parameters)

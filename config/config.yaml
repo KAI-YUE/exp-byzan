@@ -2,25 +2,30 @@
 device: cuda
 seed: 309
 
-# distributed networks
-# users:            number of users
-# random_sampling:   whether or not perform random sampling before each iteration
-# sampling_fraction: the fraction of users to sample
-# alpha:             the alpha parameter of the Dirichlet distribution 
-rounds: 100
-users: 31
+# distributed settings
+rounds: 50
+total_users: 31
+num_attackers: 6
 part_rate: 1
-user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
+user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat"
 # user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/full_map.dat"
 
-# hyperparameters and model type
+# attacker model 
+attacker_model: "signflipping"
+
+# hyperparameters and settings
+aggregator: "mean"
+aggregator: "krum"
+multimkrum_param: 13
+aggregator: "median"
+
+
 batch_size: 100
 tau: 20
-
 optimizer: "Adam"
 lr: 5.e-3
 momentum: 0
-weight_decay: 0.
+weight_decay: 5.e-4
 
 model: "lenet_5"
 checkpoint_path: ""
@@ -30,12 +35,6 @@ dataset: "fmnist"
 data_path: "/mnt/ex-ssd/Datasets/fmnist/"
 # dataset: "cifar10"
 # data_path: "/mnt/ex-ssd/Datasets/cifar10/"
-
-sample_size:
-- 28
-- 28
-channels: 1
-classes: 10
 
 # Log configurations
 output_folder: "experiments"

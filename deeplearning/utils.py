@@ -30,15 +30,12 @@ def init_all(config, dataset, logger):
         with open(config.user_data_mapping, "rb") as fp:
             user_data_mapping = pickle.load(fp)
 
-
-    # macs, params = get_model_complexity_info(network, (dataset.channel, config.im_size[0], config.im_size[1]), print_per_layer_stat=False, as_strings=True, verbose=False)
-    # logger.info('{:<30}  {:<8}'.format('MACs: ', macs))
-    # logger.info('{:<30}  {:<8}'.format('Number of parameters: ', params))
-
     # initialize user ids
-    user_ids = np.arange(config.users)
+    num_normal_users = config.total_users - config.num_attackers
+    user_ids = np.arange(num_normal_users)
+    attacker_ids = np.arange(num_normal_users, config.total_users)
 
-    return network, criterion, user_ids, user_data_mapping, start_round
+    return network, criterion, user_ids, attacker_ids, user_data_mapping, start_round
 
 
 def init_optimizer(config, network):
@@ -109,7 +106,7 @@ def validate_and_log(config, model, train_loader, test_loader, criterion, comm_r
             # config.output_dir + "/checkpoint_epoch{:d}.pth".format(epoch))
             config.output_dir + "/checkpoint.pth")
 
-    logger.info("Train Acc: {:.4f}, Test acc: {:.2f}".format(trainacc, testacc))
+    logger.info("Train Acc: {:.2f}, Test acc: {:.2f}".format(trainacc, testacc))
 
     record["train_acc"].append(trainacc)
     record["test_loss"].append(test_loss)
