@@ -1,7 +1,11 @@
-from fedlearning.byzantine.signflipping import SignflippingAttacker
+from fedlearning.byzantine.signflipping import OmniscientSignflippingAttacker, SignflippingAttacker
+from fedlearning.byzantine.fang import FangattackAdversary
 
 attacker_registry = {
     "signflipping":            SignflippingAttacker,
+    "omniscient_signflipping": OmniscientSignflippingAttacker,
+
+    "fang":                    FangattackAdversary,
 }
 
 def init_attacker(config):

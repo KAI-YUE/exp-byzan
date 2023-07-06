@@ -15,6 +15,10 @@ class Client(object):
         self.tau = config.tau
         self.device = config.device
         self.config = config
+        self.complete_attack = False
+
+    def init_local_dataset(self, *args):
+        pass
 
     def local_step(self):
         pass

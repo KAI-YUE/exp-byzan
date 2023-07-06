@@ -112,7 +112,7 @@ class Multikrum(_BaseAggregator):
     """
 
     def __init__(self, config):
-        self.f = config.num_attackers
+        self.f = config.input_b
         self.m = config.multimkrum_param
         super(Multikrum, self).__init__()
 

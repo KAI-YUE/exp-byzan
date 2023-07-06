@@ -48,9 +48,12 @@ def federated_learning(config, logger, record):
         for i, attacker_id in enumerate(attacker_ids):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, user_data_mapping[user_id])
-            updater.local_step(criterion, oracle=oracle)
+            updater.local_step(criterion=criterion, oracle=oracle, benign_packages=benign_packages)
 
             attacker_package = updater.uplink_transmit()
+            if updater.complete_attack:
+                break
+
             attacker_packages[attacker_id] = attacker_package
 
         # Update the global model
@@ -62,8 +65,28 @@ def federated_learning(config, logger, record):
 def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
+    # user_data_mappings = [
+    #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+    #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
+    # ]
+    # aggregators = ["mean", "median", "krum"]
+    # num_attackers = [2, 6, 10, 14]
+
+    # attach = True
+    # for user_data_mapping in user_data_mappings:
+    #     for aggregator in aggregators:
+    #         for num_att in num_attackers:
+                
+    #             output_dir = init_outputfolder(config)
+    #             logger = init_logger(config, output_dir, config.seed, attach=attach)
+
+    #             config.user_data_mapping = user_data_mapping
+    #             config.aggregator = aggregator
+    #             config.num_attackers = num_att
+
     output_dir = init_outputfolder(config)
     logger = init_logger(config, output_dir, config.seed)
+
     record = init_record(config)
 
     if config.device == "cuda":
@@ -75,6 +98,7 @@ def main():
 
     logger.info("{:.3} mins has elapsed".format((end-start)/60))
     save_record(record, output_dir)
+    attach = False
 
 if __name__ == "__main__":
     main()

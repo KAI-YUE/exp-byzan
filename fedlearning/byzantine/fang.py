@@ -3,6 +3,7 @@ from typing import Generator
 import numpy as np
 import torch
 
+from fedlearning.buffer import WeightBuffer
 from fedlearning.client import Client
 from fedlearning.aggregators.krum import Multikrum
 from fedlearning.buffer import _get_para
@@ -12,6 +13,7 @@ class FangattackAdversary(Client):
 
     def __init__(self, config, model):
         super().__init__(config, model)
+        self.num_byzantine = config.num_attackers
 
     def attack_median_and_trimmedmean(self, benign_packages):
 
@@ -68,9 +70,15 @@ class FangattackAdversary(Client):
         ).T
 
         shape, num_params = self._retrieve_shape(benign_packages[0].state_dict())
-        delta = self._updates_to_state_dict(mal_vec, shape, num_params)
+        
+        deltas = {}
+        for i, vec in enumerate(mal_vec):
+            delta = self._updates_to_state_dict(vec, shape, num_params)
+            deltas[i] = WeightBuffer(delta)
+        
+        self.complete_attack = True
 
-        return delta
+        return deltas
 
     def attack_multikrum(self, benign_packages, local_packages):
         multi_krum = Multikrum(self.config)
@@ -134,7 +142,7 @@ class FangattackAdversary(Client):
         delta = torch.zeros(num_params)
 
 
-    def local_step(self, criterion, **kwargs):
+    def local_step(self, **kwargs):
         """Perform local update tau times.
 
         Args,
@@ -143,9 +151,8 @@ class FangattackAdversary(Client):
         self.benign_packages = kwargs["benign_packages"]
 
     def uplink_transmit(self):
-        
         delta = self.attack_median_and_trimmedmean(self.benign_packages)
-        return self.delta
+        return delta
 
 
     def _get_updates(self, local_packages):
@@ -157,6 +164,15 @@ class FangattackAdversary(Client):
         updates = torch.stack(updates)
         return updates
     
+    def _retrieve_shape(self, state_dict):
+        shape = {}
+        num_params = []
+        for i, key in enumerate(state_dict):
+            shape[key] = state_dict[key].shape
+            num_params.append(state_dict[key].numel())
+
+        return shape, num_params
+    
     def _updates_to_state_dict(self, updates, shape, num_params):
         state_dict = {}
         num_params.append(-1)
@@ -167,3 +183,5 @@ class FangattackAdversary(Client):
             q += num_params[i+1]
 
         return state_dict
+    
+

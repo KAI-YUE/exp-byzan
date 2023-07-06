@@ -6,6 +6,19 @@ from fedlearning.client import Client
 from deeplearning.datasets import fetch_dataloader
 from deeplearning.utils import init_optimizer
 
+class OmniscientSignflippingAttacker(Client):
+    def __init__(self, *args):
+        pass
+    
+    def init_local_dataset(self, *args):
+        pass
+
+    def local_step(self, oracle, **kwargs):
+        self.delta = oracle * (-1.5)
+
+    def uplink_transmit(self):
+        return self.delta
+
 
 class SignflippingAttacker(Client):
     def __init__(self, config, model, **kwargs):
