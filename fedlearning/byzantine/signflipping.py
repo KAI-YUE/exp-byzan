@@ -7,8 +7,8 @@ from deeplearning.datasets import fetch_dataloader
 from deeplearning.utils import init_optimizer
 
 class OmniscientSignflippingAttacker(Client):
-    def __init__(self, *args):
-        pass
+    def __init__(self, config, model, **kwargs):
+        super(OmniscientSignflippingAttacker, self).__init__(config, model, **kwargs)
     
     def init_local_dataset(self, *args):
         pass

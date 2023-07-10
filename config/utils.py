@@ -17,8 +17,7 @@ def init_logger(config, output_dir, seed=0, attach=True):
     sh.setLevel(log_level)
 
     logger.addHandler(fh)
-    if attach:
-        logger.addHandler(sh)
+    logger.addHandler(sh)
     logger.info("-"*80)
     logger.info("Run with seed {:d}.".format(seed))
 
@@ -65,13 +64,6 @@ def count_parameters(model):
 
 def init_record(config):
     record = {}
-    # put some config info into record
-    record["tau"] = config.tau
-    record["batch_size"] = config.batch_size
-    record["lr"] = config.lr
-    record["momentum"] = config.momentum
-    record["weight_decay"] = config.weight_decay
-
     # initialize data record 
     record["train_acc"] = []
     record["test_acc"] = []

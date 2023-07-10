@@ -4,7 +4,6 @@ from fedlearning.aggregators.initialize import _BaseAggregator
 from fedlearning.buffer import _get_para, WeightBuffer
 
 class Median(_BaseAggregator):
-    r"""Computes the ``sample mean`` over the updates from all give clients."""
     def __init__(self, config):
         self.num_users = config.total_users
 

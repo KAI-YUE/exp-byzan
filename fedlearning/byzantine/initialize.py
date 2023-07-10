@@ -1,11 +1,14 @@
 from fedlearning.byzantine.signflipping import OmniscientSignflippingAttacker, SignflippingAttacker
-from fedlearning.byzantine.fang import FangattackAdversary
+from fedlearning.byzantine.alie import AlieAttacker
+from fedlearning.byzantine.ipm import IPMAttacker
 
 attacker_registry = {
     "signflipping":            SignflippingAttacker,
     "omniscient_signflipping": OmniscientSignflippingAttacker,
 
-    "fang":                    FangattackAdversary,
+    "ipm":                     IPMAttacker,
+    "alie":                    AlieAttacker,
+    # "fang":                    FangattackAdversary,
 }
 
 def init_attacker(config):

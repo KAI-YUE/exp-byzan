@@ -69,18 +69,19 @@ def main():
     #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
     #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
     # ]
-    # aggregators = ["mean", "median", "krum"]
+    # attackers = ["ipm", "alie"]
+    # aggregators = ["mean", "median", "krum", "trimmed_mean", "centeredclipping"]
     # num_attackers = [2, 6, 10, 14]
 
-    # attach = True
-    # for user_data_mapping in user_data_mappings:
+    # for attacker in attackers:
     #     for aggregator in aggregators:
     #         for num_att in num_attackers:
                 
-    #             output_dir = init_outputfolder(config)
-    #             logger = init_logger(config, output_dir, config.seed, attach=attach)
+    #             # output_dir = init_outputfolder(config)
+    #             # logger = init_logger(config, output_dir, config.seed, attach=attach)
 
-    #             config.user_data_mapping = user_data_mapping
+    #             # config.user_data_mapping = user_data_mapping
+    #             config.attacker_model = attacker
     #             config.aggregator = aggregator
     #             config.num_attackers = num_att
 
@@ -98,7 +99,8 @@ def main():
 
     logger.info("{:.3} mins has elapsed".format((end-start)/60))
     save_record(record, output_dir)
-    attach = False
+
+    logger.handlers.clear()
 
 if __name__ == "__main__":
     main()

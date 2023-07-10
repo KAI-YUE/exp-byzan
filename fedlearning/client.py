@@ -2,6 +2,7 @@ import copy
 import numpy as np
 
 from fedlearning.buffer import WeightBuffer
+from fedlearning.compressor import compressor_registry
 from deeplearning.datasets import fetch_dataloader
 from deeplearning.utils import init_optimizer, AverageMeter
 
@@ -32,6 +33,10 @@ class LocalUpdater(Client):
         """Construct a local updater for a user.
         """
         super(LocalUpdater, self).__init__(config, model, **kwargs)
+        if config.compressor in compressor_registry.keys():
+            self.compressor = compressor_registry[config.compressor](config)
+        else:
+            self.compressor = None
 
     def init_local_dataset(self, dataset, data_idx):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
@@ -65,10 +70,21 @@ class LocalUpdater(Client):
                     break_flag = True
                     break
                 
+    def compress(self, delta):
+        """Compress the local gradients.
+        """
+        gradient = delta.state_dict()
+        for w_name, grad in gradient.items():
+            gradient[w_name] = self.compressor.compress(grad)
+
     def uplink_transmit(self):
         """Simulate the transmission of local gradients to the central server.
         """ 
         w_tau = WeightBuffer(self.local_model.state_dict())
         delta = self.w0 - w_tau
 
+        if self.compressor is not None:
+            self.compress(delta)
+
         return delta
+    
