@@ -56,7 +56,7 @@ class SignflippingAttacker(Client):
                     break_flag = True
                     break
                 
-    def uplink_transmit(self):
+    def compute_delta(self):
         """Simulate the transmission of local gradients with flipped signs.
         """ 
         w_tau = WeightBuffer(self.local_model.state_dict())

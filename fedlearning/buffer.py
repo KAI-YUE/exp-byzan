@@ -4,9 +4,6 @@ import copy
 import torch
 import torch.nn as nn
 
-# My Libraries
-from config.utils import *
-
 class WeightBuffer(object):
     def __init__(self, weight_dict, mode="copy"):
         self._weight_dict = copy.deepcopy(weight_dict)

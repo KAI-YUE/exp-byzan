@@ -1,4 +1,4 @@
-from fedlearning.compressor.stosignsgd import SignSGDCompressor, StoSignSGDCompressor, OptimalStoSignSGDCompressor
+from fedlearning.compressors.stosignsgd import SignSGDCompressor, StoSignSGDCompressor, OptimalStoSignSGDCompressor
 
 compressor_registry = {
     "signSGD":           SignSGDCompressor,

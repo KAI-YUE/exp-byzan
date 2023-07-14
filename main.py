@@ -7,7 +7,6 @@ import torch
 from config import *
 from deeplearning.utils import *
 from deeplearning.datasets import *
-from deeplearning.dataset import *
 from fedlearning import *
 from fedlearning.aggregators import BenignFedAvg
 
@@ -52,6 +51,8 @@ def federated_learning(config, logger, record):
 
             attacker_package = updater.uplink_transmit()
             if updater.complete_attack:
+                for j in range(0, len(attacker_ids)):
+                    attacker_packages[attacker_ids[j]] = attacker_package
                 break
 
             attacker_packages[attacker_id] = attacker_package
@@ -75,15 +76,13 @@ def main():
 
     # for attacker in attackers:
     #     for aggregator in aggregators:
-    #         for num_att in num_attackers:
-                
-    #             # output_dir = init_outputfolder(config)
-    #             # logger = init_logger(config, output_dir, config.seed, attach=attach)
+    # for num_att in num_attackers:
 
-    #             # config.user_data_mapping = user_data_mapping
-    #             config.attacker_model = attacker
-    #             config.aggregator = aggregator
-    #             config.num_attackers = num_att
+        # config.user_data_mapping = user_data_mapping
+        # config.attacker_model = attacker
+        # config.aggregator = aggregator
+        # config.num_attackers = num_att
+        # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
     output_dir = init_outputfolder(config)
     logger = init_logger(config, output_dir, config.seed)

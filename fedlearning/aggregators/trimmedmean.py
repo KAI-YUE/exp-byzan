@@ -5,10 +5,11 @@ from fedlearning.aggregators.initialize import _BaseAggregator
 
 class TrimmedMean(_BaseAggregator):
     def __init__(self, config):
+        super(TrimmedMean, self).__init__(config)
         self.num_users = config.total_users
         self.b = config.num_attackers
 
-    def __call__(self, local_packages):
+    def _aggregate(self, local_packages):
         neg_smallest, largest, updates, new_stacked = {}, {}, {}, {}
         package_keys = list(local_packages.keys())
         user_state_dict = local_packages[package_keys[0]].state_dict()

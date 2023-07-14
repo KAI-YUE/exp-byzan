@@ -3,6 +3,7 @@ from fedlearning.aggregators.initialize import _BaseAggregator
 class Vote(_BaseAggregator):
     r"""Computes the vote results of signs."""
     def __init__(self, config):
+        super(Vote, self).__init__(config)
         self.num_users = config.total_users
         self.lr = config.global_lr
 

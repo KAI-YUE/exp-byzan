@@ -1,5 +1,4 @@
 # My libraries
-from config.utils import *
 from fedlearning.buffer import WeightBuffer
 from fedlearning.aggregators import aggregator_registry
 
@@ -22,3 +21,7 @@ class GlobalUpdater(object):
         accumulated_delta = self.aggregator(benign_packages)
         global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
         model.load_state_dict(global_weight.state_dict())
+
+    @property
+    def momentum(self):
+        return self.aggregator.momentum

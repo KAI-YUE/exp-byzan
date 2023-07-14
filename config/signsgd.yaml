@@ -3,14 +3,14 @@ device: cuda
 seed: 1002
 
 # distributed settings
-rounds: 50
+rounds: 100
 total_users: 31
-num_attackers: 10
+num_attackers: 2
 part_rate: 1
 user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat"
 # user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.2_0.dat"
 # user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat"
-user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
+# user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
 user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
 # attacker model 
@@ -18,30 +18,29 @@ attacker_model: "signflipping"
 # attacker_model: "omniscient_signflipping"
 # attacker_model: "fang"
 # attacker_model: "ipm"
-# ipm_multiplier: 1.3
-# attacker_model: "alie"
+# ipm_multiplier: 1.1
+attacker_model: "alie"
 
 # compressor
-compressor: "none"
+compressor: "optim_sto_signSGD"
+# compressor: "none"
 
 # hyperparameters and settings
-aggregator: "mean"
-# aggregator: "krum"
-input_b: 14
-multimkrum_param: 14
-# aggregator: "median"
-# aggregator: "trimmed_mean"
-# aggregator: "centeredclipping"
-cc_bound: 10
-store_momentum: True
-
-# aggregator: "vote"
-# global_lr: 1.e-3
+aggregator: "vote"
+global_lr: 5.e-4
+store_momentum: False
 
 batch_size: 100
-tau: 20
+tau: 1
 optimizer: "Adam"
-lr: 5.e-4
+lr: 1.e-3
+
+# tau: 1
+# optimizer: "SGD"
+# nesterov: False
+# lr: 1.e-4
+# momentum: 0.9
+
 weight_decay: 5.e-4
 
 model: "lenet_5"

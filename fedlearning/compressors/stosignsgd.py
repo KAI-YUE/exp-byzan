@@ -1,7 +1,7 @@
 import torch
 
 # My libraries
-from fedlearning.compressor.initialize import Compressor
+from fedlearning.compressors.initialize import Compressor
 
 class SignSGDCompressor(Compressor):
 
@@ -73,7 +73,7 @@ class OptimalStoSignSGDCompressor(Compressor):
         ones_tensor = torch.ones_like(tensor)
         b = tensor.abs().max()
 
-        encoded_tensor = torch.where(random_variable<=(1/2+tensor/b), ones_tensor, -ones_tensor)
+        encoded_tensor = torch.where(random_variable<=(1/2+tensor/(2*b)), ones_tensor, -ones_tensor)
         return encoded_tensor
 
     

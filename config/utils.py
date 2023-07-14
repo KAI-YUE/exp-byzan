@@ -4,7 +4,7 @@ import numpy as np
 import pickle
 import datetime
 
-def init_logger(config, output_dir, seed=0, attach=True):
+def init_logger(config, output_dir, seed=0):
     """Initialize a logger object. 
     """
     log_level = "INFO"

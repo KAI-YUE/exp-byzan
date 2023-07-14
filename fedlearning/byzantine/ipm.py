@@ -11,5 +11,5 @@ class IPMAttacker(Client):
     def local_step(self, oracle, **kwargs):
         self.delta = oracle * (-self.ipm_multiplier)
 
-    def uplink_transmit(self):
+    def compute_delta(self):
         return self.delta

@@ -112,11 +112,11 @@ class Multikrum(_BaseAggregator):
     """
 
     def __init__(self, config):
+        super(Multikrum, self).__init__(config)
         self.f = config.input_b
         self.m = config.multimkrum_param
-        super(Multikrum, self).__init__()
 
-    def __call__(self, local_packages):
+    def _aggregate(self, local_packages):
         updates = self._get_updates(local_packages)
         distances = _pairwise_euclidean_distances(updates)
         top_m_indices = _multi_krum(distances, len(updates), self.f, self.m)

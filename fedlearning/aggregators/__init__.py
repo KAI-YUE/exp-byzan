@@ -4,6 +4,7 @@ from .krum import Multikrum
 from .trimmedmean import TrimmedMean
 from .centerclipping import CenteredClipping
 from .vote import Vote
+from .momentum import MeanMomentum
 
 aggregator_registry = {
     "mean":             Mean,
@@ -12,5 +13,7 @@ aggregator_registry = {
     "centeredclipping":  CenteredClipping,
 
     "krum":             Multikrum,
-    "vote":             Vote
+    "vote":             Vote,
+
+    "mean_momentum":    MeanMomentum,
 }

@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from ptflops import get_model_complexity_info
 
-from deeplearning.networks.initialize import nn_registry
+from deeplearning.networks import nn_registry
 
 def init_all(config, dataset, logger):
     network = nn_registry[config.model](dataset.channel, dataset.num_classes, dataset.im_size)

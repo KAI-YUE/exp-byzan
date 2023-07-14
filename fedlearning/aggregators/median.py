@@ -5,9 +5,10 @@ from fedlearning.buffer import _get_para, WeightBuffer
 
 class Median(_BaseAggregator):
     def __init__(self, config):
+        super(Median, self).__init__(config)
         self.num_users = config.total_users
 
-    def __call__(self, local_packages):
+    def _aggregate(self, local_packages):
         updates = self._get_updates(local_packages)
         median_updates, _ = torch.median(updates, dim=0)
 

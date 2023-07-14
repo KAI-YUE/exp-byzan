@@ -1,9 +1,9 @@
 from fedlearning.aggregators.initialize import _BaseAggregator
 
-class Mean(_BaseAggregator):
+class MeanMomentum(_BaseAggregator):
     r"""Computes the ``sample mean`` over the updates from all give clients."""
     def __init__(self, config):
-        super(Mean, self).__init__(config)
+        super(MeanMomentum, self).__init__(config)
         self.num_users = config.total_users
 
     def _aggregate(self, local_packages):
@@ -17,9 +17,3 @@ class Mean(_BaseAggregator):
 
         return accumulated_delta
 
-
-class BenignFedAvg(Mean):
-    r"""Computes the ``sample mean`` over the updates from all give clients."""
-    def __init__(self, num_users):
-        self.store_momentum = False
-        self.num_users = num_users
