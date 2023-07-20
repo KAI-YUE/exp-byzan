@@ -21,6 +21,7 @@ class GlobalUpdater(object):
         accumulated_delta = self.aggregator(benign_packages)
         global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
         model.load_state_dict(global_weight.state_dict())
+        # model.load_state_dict(accumulated_delta.state_dict())
 
     @property
     def momentum(self):

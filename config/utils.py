@@ -3,6 +3,7 @@ import logging
 import numpy as np
 import pickle
 import datetime
+import torch
 
 def init_logger(config, output_dir, seed=0):
     """Initialize a logger object. 
