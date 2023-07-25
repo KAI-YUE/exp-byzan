@@ -21,23 +21,26 @@ attacker_model: "signflipping"
 # ipm_multiplier: 1.3
 # attacker_model: "alie"
 attacker_model: "model_replace"
-model_checkpoint: "/home/kyue/expdata/byzantine/a0.1/signflipping/krum/6/checkpoint.pth"
-model_checkpoint: "/home/kyue/expdata/byzantine/mr_models/0719_2303/checkpoint.pth"
+# model_checkpoint: "/home/kyue/expdata/byzantine/a0.1/signflipping/krum/6/checkpoint.pth"
+# model_checkpoint: "/home/kyue/expdata/byzantine/mr_models/0719_2303/checkpoint.pth"
+attacker_model: "omniscient_trapsetter"
+attacker_model: "nonomniscient_trapsetter"
 model_checkpoint: ""
-scaling_factor: 0.05
+scaling_factor: 0.1
+radius: 0.5
 
 # compressor
 compressor: "none"
 
 # hyperparameters and settings
 aggregator: "mean"
-aggregator: "krum"
+# aggregator: "krum"
 input_b: 14
 multimkrum_param: 14
 # aggregator: "median"
-aggregator: "trimmed_mean"
-# aggregator: "centeredclipping"
-# cc_bound: 10
+# aggregator: "trimmed_mean"
+aggregator: "centeredclipping"
+cc_bound: 10
 
 store_momentum: True
 

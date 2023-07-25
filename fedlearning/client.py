@@ -45,6 +45,7 @@ class Client(object):
         for w_name, grad in gradient.items():
             gradient[w_name] = self.compressor.compress(grad)
 
+
 class LocalUpdater(Client):
     def __init__(self, config, model, **kwargs):
         """Construct a local updater for a user.

@@ -10,7 +10,10 @@ class WeightBuffer(object):
         if mode == "zeros":
             for w_name, w_value in self._weight_dict.items():
                 self._weight_dict[w_name].data = torch.zeros_like(w_value)
-        
+        if mode == "rand":
+            for w_name, w_value in self._weight_dict.items():
+                self._weight_dict[w_name].data = torch.rand_like(w_value)
+
     def __add__(self, weight_buffer):
         weight_dict = copy.deepcopy(self._weight_dict)
         for w_name, w_value in weight_dict.items():
