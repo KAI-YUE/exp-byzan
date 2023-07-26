@@ -69,6 +69,7 @@ def main(config_path):
     
     
     num_attackers = [2, 6, 10, 14]
+    # num_attackers = [2]
 
     # for attacker in attackers:
     #     for aggregator in aggregators:

@@ -69,7 +69,7 @@ def main(config_file=""):
     #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
     # ]
     # attackers = ["ipm", "alie"]
-    aggregators = ["krum", "trimmed_mean", "centeredclipping"]
+    aggregators = ["median", "krum", "trimmed_mean", "centeredclipping"]
     num_attackers = [2, 6, 10, 14]
     # num_attackers = [10]
 

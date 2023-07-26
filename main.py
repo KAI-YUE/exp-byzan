@@ -48,7 +48,13 @@ def federated_learning(config, logger, record):
         attacker_packages = {}
         for i, attacker_id in enumerate(attacker_ids):
             updater = ByzantineUpdater(config, model)
-            updater.init_local_dataset(dataset, user_data_mapping[user_id])
+            collusion_ids = []
+            for j, id in enumerate(attacker_ids):
+                collusion_ids.append(user_data_mapping[id])
+            collusion_ids = np.hstack(collusion_ids)
+            collusion_ids = collusion_ids.flatten()
+
+            updater.init_local_dataset(dataset, collusion_ids)
             updater.local_step(oracle=oracle, network=model,test_loader=test_loader, criterion=criterion)
 
             attacker_package = updater.uplink_transmit()

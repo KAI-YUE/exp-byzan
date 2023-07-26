@@ -11,7 +11,7 @@ user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx
 # user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.2_0.dat"
 # user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat"
 user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
-user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
+# user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
 # attacker model 
 attacker_model: "rop"

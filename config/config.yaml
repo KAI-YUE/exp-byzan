@@ -16,18 +16,18 @@ user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx
 # attacker model 
 attacker_model: "signflipping"
 # attacker_model: "omniscient_signflipping"
-# attacker_model: "fang"
+attacker_model: "fang"
 # attacker_model: "ipm"
 # ipm_multiplier: 1.3
 # attacker_model: "alie"
-attacker_model: "model_replace"
-# model_checkpoint: "/home/kyue/expdata/byzantine/a0.1/signflipping/krum/6/checkpoint.pth"
-# model_checkpoint: "/home/kyue/expdata/byzantine/mr_models/0719_2303/checkpoint.pth"
-attacker_model: "omniscient_trapsetter"
-attacker_model: "nonomniscient_trapsetter"
-model_checkpoint: ""
-scaling_factor: 0.1
-radius: 0.5
+# attacker_model: "model_replace"
+# # model_checkpoint: "/home/kyue/expdata/byzantine/a0.1/signflipping/krum/6/checkpoint.pth"
+# # model_checkpoint: "/home/kyue/expdata/byzantine/mr_models/0719_2303/checkpoint.pth"
+# attacker_model: "omniscient_trapsetter"
+# attacker_model: "nonomniscient_trapsetter"
+# model_checkpoint: ""
+# scaling_factor: 0.1
+# radius: 0.5
 
 # compressor
 compressor: "none"
