@@ -1,4 +1,5 @@
 import os
+import copy
 import torch
 import numpy as np
 
@@ -101,7 +102,11 @@ class OmniscientTrapSetter(Client):
         start_point = start_point + dir_one
         start_point = start_point + dir_two
 
+        network.load_state_dict(start_point._weight_dict)
+        acc, loss = test(test_loader, network, criterion, self.config)
+
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
+        print("actual acc {:.3f}".format(acc))
 
         return start_point
 
@@ -114,13 +119,20 @@ class OmniscientTrapSetter(Client):
             for w_name, w in self.target_w._weight_dict.items():
                 self.target_w._weight_dict[w_name] = torch.rand_like(w)
 
-    def local_step(self, oracle, network, test_loader, criterion, **kwargs):
+    def local_step(self, oracle, network, test_loader, criterion, comm_round, **kwargs):
         hypothetical_weight = self.w0 - oracle
-        network.load_state_dict(hypothetical_weight.state_dict())
-        self.target_w = self.grid_search(network, test_loader, criterion)
+
+        backup_weight = copy.deepcopy(network.state_dict())
+        
+        if comm_round % self.config.change_target_freq == 0:
+            network.load_state_dict(hypothetical_weight.state_dict())
+            self.target_w = self.grid_search(network, test_loader, criterion)
+            torch.save({"state_dict": self.target_w.state_dict()}, "/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
+            exit(0)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True
+        network.load_state_dict(backup_weight)
 
     def compute_delta(self):
         delta = (self.w0*(self.total_users/self.num_attacker) - self.interm_w)*self.scaling_factor 
@@ -234,11 +246,15 @@ class NonOmniscientTrapSetter(Client):
     def local_step(self, oracle, network, test_loader, criterion, **kwargs):
         self.estimate_weight(criterion)
         hypothetical_weight = self.local_model
+
+        backup_weight = copy.deepcopy(network.state_dict())
         network.load_state_dict(hypothetical_weight.state_dict())
         self.target_w = self.grid_search(network, test_loader, criterion)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True
+
+        network.load_state_dict(backup_weight)
 
     def compute_delta(self):
         delta = (self.w0*(self.total_users/self.num_attacker) - self.interm_w)*self.scaling_factor 

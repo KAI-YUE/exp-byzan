@@ -1,4 +1,5 @@
 import time
+import copy
 import numpy as np
 
 # PyTorch libraries
@@ -34,6 +35,8 @@ def federated_learning(config, logger, record):
     fedavg_oracle = BenignFedAvg(num_users=config.total_users - config.num_attackers)
     best_testacc = 0.
 
+
+    # ref = None
     for comm_round in range(start_round, config.rounds):
         benign_packages = {}
         for i, user_id in enumerate(user_ids):
@@ -48,14 +51,8 @@ def federated_learning(config, logger, record):
         attacker_packages = {}
         for i, attacker_id in enumerate(attacker_ids):
             updater = ByzantineUpdater(config, model)
-            collusion_ids = []
-            for j, id in enumerate(attacker_ids):
-                collusion_ids.append(user_data_mapping[id])
-            collusion_ids = np.hstack(collusion_ids)
-            collusion_ids = collusion_ids.flatten()
-
-            updater.init_local_dataset(dataset, collusion_ids)
-            updater.local_step(oracle=oracle, network=model,test_loader=test_loader, criterion=criterion)
+            updater.init_local_dataset(dataset, user_data_mapping[user_id])
+            updater.local_step(oracle=oracle, network=model,test_loader=test_loader, criterion=criterion, comm_round=comm_round)
 
             attacker_package = updater.uplink_transmit()
             if updater.complete_attack:
@@ -66,7 +63,16 @@ def federated_learning(config, logger, record):
             attacker_packages[attacker_id] = attacker_package
 
         # Update the global model
-        global_updater.global_step(model, benign_packages, attacker_packages, record=record)
+        global_updater.global_step(model, benign_packages, attacker_packages, record=record, reference=updater.target_w)
+
+        # if ref is not None:
+        #     for w_, w in model.state_dict().items():
+        #         print((w-ref[w_]).sum())
+        # else:
+        #     ref = copy.deepcopy(model.state_dict())
+
+        state_dict = torch.load("/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
+        model.load(state_dict["state_dict"])
 
         # Validate the model performance and log
         best_testacc = validate_and_log(config, model, dummy_train_loader, test_loader, criterion, comm_round, best_testacc, logger, record)
@@ -80,36 +86,38 @@ def main():
     # ]
     # attackers = ["ipm", "alie"]
     radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
-    num_attackers = [2, 6, 10, 14]
+    # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
+    # aggregators = ["mean"]
+    # num_attackers = [10, 14]
+    # num_attackers = [0]
 
-    for aggregator in aggregators:
-        for num_att in num_attackers:
+    # for aggregator in aggregators:
+    #     for num_att in num_attackers:
 
             # config.radius = r
             # config.user_data_mapping = user_data_mapping
             # config.attacker_model = attacker
-            config.aggregator = aggregator
+            # config.aggregator = aggregator
 
-            config.num_attackers = num_att
-            config.ipm_multiplier = (config.total_users-num_att)/num_att
+            # config.num_attackers = num_att
+            # # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
-            output_dir = init_outputfolder(config)
-            logger = init_logger(config, output_dir, config.seed)
+    output_dir = init_outputfolder(config)
+    logger = init_logger(config, output_dir, config.seed)
 
-            record = init_record(config)
+    record = init_record(config)
 
-            if config.device == "cuda":
-                torch.backends.cudnn.benchmark = True
+    if config.device == "cuda":
+        torch.backends.cudnn.benchmark = True
 
-            start = time.time()
-            federated_learning(config, logger, record)
-            end = time.time()
+    start = time.time()
+    federated_learning(config, logger, record)
+    end = time.time()
 
-            logger.info("{:.3} mins has elapsed".format((end-start)/60))
-            save_record(record, output_dir)
+    logger.info("{:.3} mins has elapsed".format((end-start)/60))
+    save_record(record, output_dir)
 
-            logger.handlers.clear()
+    logger.handlers.clear()
 
 if __name__ == "__main__":
     main()
