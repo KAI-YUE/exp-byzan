@@ -59,7 +59,6 @@ class OmniscientTrapSetter(Client):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
-        start_point = WeightBuffer(network.state_dict(), mode="copy")
 
         # layer-wise normalization 
         for w_name, w_val in dir_one._weight_dict.items():
@@ -70,6 +69,7 @@ class OmniscientTrapSetter(Client):
         cursor = cursor - dir_one
         cursor = cursor - dir_two
         dir_one, dir_two = dir_one*(2/self.steps), dir_two*(2/self.steps)
+        start_point = copy.deepcopy(cursor)
 
         data_matrix = []
         for i in range(self.steps):
@@ -98,6 +98,7 @@ class OmniscientTrapSetter(Client):
         data_matrix = np.asarray(data_matrix)
         low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
         
+        print(low_acc_idx)
         dir_one, dir_two = dir_one*low_acc_idx[0], dir_two*low_acc_idx[1]
         start_point = start_point + dir_one
         start_point = start_point + dir_two
@@ -127,8 +128,8 @@ class OmniscientTrapSetter(Client):
         if comm_round % self.config.change_target_freq == 0:
             network.load_state_dict(hypothetical_weight.state_dict())
             self.target_w = self.grid_search(network, test_loader, criterion)
-            torch.save({"state_dict": self.target_w.state_dict()}, "/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
-            exit(0)
+            # torch.save({"state_dict": self.target_w.state_dict()}, "/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
+            # exit(0)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True
@@ -162,7 +163,6 @@ class NonOmniscientTrapSetter(Client):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
-        start_point = WeightBuffer(network.state_dict(), mode="copy")
 
         # layer-wise normalization 
         for w_name, w_val in dir_one._weight_dict.items():
@@ -173,6 +173,7 @@ class NonOmniscientTrapSetter(Client):
         cursor = cursor - dir_one
         cursor = cursor - dir_two
         dir_one, dir_two = dir_one*(2/self.steps), dir_two*(2/self.steps)
+        start_point = copy.deepcopy(cursor)
 
         data_matrix = []
         for i in range(self.steps):
@@ -201,11 +202,16 @@ class NonOmniscientTrapSetter(Client):
         data_matrix = np.asarray(data_matrix)
         low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
         
+        print(low_acc_idx)
         dir_one, dir_two = dir_one*low_acc_idx[0], dir_two*low_acc_idx[1]
         start_point = start_point + dir_one
         start_point = start_point + dir_two
 
+        network.load_state_dict(start_point._weight_dict)
+        acc, loss = test(test_loader, network, criterion, self.config)
+
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
+        print("actual acc {:.3f}".format(acc))
 
         return start_point
 
@@ -243,13 +249,14 @@ class NonOmniscientTrapSetter(Client):
                     break
 
 
-    def local_step(self, oracle, network, test_loader, criterion, **kwargs):
-        self.estimate_weight(criterion)
-        hypothetical_weight = self.local_model
-
+    def local_step(self, oracle, network, test_loader, criterion, comm_round, **kwargs):
         backup_weight = copy.deepcopy(network.state_dict())
-        network.load_state_dict(hypothetical_weight.state_dict())
-        self.target_w = self.grid_search(network, test_loader, criterion)
+
+        if comm_round % self.config.change_target_freq == 0:
+            self.estimate_weight(criterion)
+            hypothetical_weight = self.local_model
+            network.load_state_dict(hypothetical_weight.state_dict())
+            self.target_w = self.grid_search(network, test_loader, criterion)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True

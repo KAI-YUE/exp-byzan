@@ -21,10 +21,10 @@ attacker_model: "ipm"
 # attacker_model: "alie"
 attacker_model: "model_replace"
 model_checkpoint: "/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth"
-# attacker_model: "omniscient_trapsetter"
+attacker_model: "omniscient_trapsetter"
 # attacker_model: "nonomniscient_trapsetter"
 # model_checkpoint: ""
-scaling_factor: 1
+scaling_factor: 0.1
 radius: 0.5
 change_target_freq: 1
 
@@ -33,12 +33,12 @@ compressor: "none"
 
 # hyperparameters and settings
 aggregator: "mean"
-# aggregator: "krum"
+aggregator: "krum"
 input_b: 14
 multimkrum_param: 14
 # aggregator: "median"
 # aggregator: "trimmed_mean"
-# aggregator: "centeredclipping"
+aggregator: "centeredclipping"
 cc_bound: 10
 
 store_momentum: True
@@ -50,7 +50,7 @@ batch_size: 100
 tau: 20
 optimizer: "Adam"
 lr: 5.e-4
-lr: 0.
+# lr: 0.
 weight_decay: 5.e-4
 
 model: "lenet_5"

@@ -23,8 +23,8 @@ class GlobalUpdater(object):
         model.load_state_dict(global_weight.state_dict())
         # model.load_state_dict(accumulated_delta.state_dict())
 
-        reference = kwargs["reference"]
-        model.load_state_dict(reference.state_dict())
+        # reference = kwargs["reference"]
+        # model.load_state_dict(reference.state_dict())
 
     @property
     def momentum(self):

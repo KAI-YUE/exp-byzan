@@ -63,7 +63,7 @@ def federated_learning(config, logger, record):
             attacker_packages[attacker_id] = attacker_package
 
         # Update the global model
-        global_updater.global_step(model, benign_packages, attacker_packages, record=record, reference=updater.target_w)
+        global_updater.global_step(model, benign_packages, attacker_packages, record=record)
 
         # if ref is not None:
         #     for w_, w in model.state_dict().items():
@@ -71,8 +71,8 @@ def federated_learning(config, logger, record):
         # else:
         #     ref = copy.deepcopy(model.state_dict())
 
-        state_dict = torch.load("/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
-        model.load(state_dict["state_dict"])
+        # state_dict = torch.load("/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
+        # model.load_state_dict(state_dict["state_dict"])
 
         # Validate the model performance and log
         best_testacc = validate_and_log(config, model, dummy_train_loader, test_loader, criterion, comm_round, best_testacc, logger, record)
@@ -84,23 +84,23 @@ def main():
     #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
     #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
     # ]
-    # attackers = ["ipm", "alie"]
-    radius = [0.3]
+    # # attackers = ["ipm", "alie"]
+    # radius = [0.3]
     # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
-    # aggregators = ["mean"]
-    # num_attackers = [10, 14]
-    # num_attackers = [0]
+    # # aggregators = ["mean"]
+    # num_attackers = [2, 6, 10, 14]
 
-    # for aggregator in aggregators:
-    #     for num_att in num_attackers:
 
-            # config.radius = r
-            # config.user_data_mapping = user_data_mapping
-            # config.attacker_model = attacker
-            # config.aggregator = aggregator
+    # for user_data_mapping in user_data_mappings:
+    #     for aggregator in aggregators:
+    #         for num_att in num_attackers:
+                # config.radius = r
+                # config.user_data_mapping = user_data_mapping
+                # # config.attacker_model = attacker
+                # config.aggregator = aggregator
 
-            # config.num_attackers = num_att
-            # # config.ipm_multiplier = (config.total_users-num_att)/num_att
+                # config.num_attackers = num_att
+                # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
     output_dir = init_outputfolder(config)
     logger = init_logger(config, output_dir, config.seed)
