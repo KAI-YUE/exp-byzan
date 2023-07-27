@@ -80,44 +80,44 @@ def federated_learning(config, logger, record):
 def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
-    # user_data_mappings = [
-    #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
-    #     "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
-    # ]
+    user_data_mappings = [
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
+    ]
     # # attackers = ["ipm", "alie"]
     # radius = [0.3]
-    # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     # # aggregators = ["mean"]
-    # num_attackers = [2, 6, 10, 14]
+    num_attackers = [2, 6, 10, 14]
+
+    for user_data_mapping in user_data_mappings:
+        for aggregator in aggregators:
+            for num_att in num_attackers:
+                config.radius = r
+                config.user_data_mapping = user_data_mapping
+                # config.attacker_model = attacker
+                config.aggregator = aggregator
+
+                config.num_attackers = num_att
+                config.ipm_multiplier = (config.total_users-num_att)/num_att
 
 
-    # for user_data_mapping in user_data_mappings:
-    #     for aggregator in aggregators:
-    #         for num_att in num_attackers:
-                # config.radius = r
-                # config.user_data_mapping = user_data_mapping
-                # # config.attacker_model = attacker
-                # config.aggregator = aggregator
+                output_dir = init_outputfolder(config)
+                logger = init_logger(config, output_dir, config.seed)
 
-                # config.num_attackers = num_att
-                # config.ipm_multiplier = (config.total_users-num_att)/num_att
+                record = init_record(config)
 
-    output_dir = init_outputfolder(config)
-    logger = init_logger(config, output_dir, config.seed)
+                if config.device == "cuda":
+                    torch.backends.cudnn.benchmark = True
 
-    record = init_record(config)
+                start = time.time()
+                federated_learning(config, logger, record)
+                end = time.time()
 
-    if config.device == "cuda":
-        torch.backends.cudnn.benchmark = True
+                logger.info("{:.3} mins has elapsed".format((end-start)/60))
+                save_record(record, output_dir)
 
-    start = time.time()
-    federated_learning(config, logger, record)
-    end = time.time()
-
-    logger.info("{:.3} mins has elapsed".format((end-start)/60))
-    save_record(record, output_dir)
-
-    logger.handlers.clear()
+                logger.handlers.clear()
 
 if __name__ == "__main__":
     main()
