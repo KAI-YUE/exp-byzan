@@ -2,7 +2,8 @@ from fedlearning.byzantine.signflipping import OmniscientSignflippingAttacker, S
 from fedlearning.byzantine.alie import AlieAttacker
 from fedlearning.byzantine.ipm import IPMAttacker
 from fedlearning.byzantine.rop import RopAttacker
-from fedlearning.byzantine.modelreplace import ModelReplaceAttacker, NonOmniscientTrapSetter, OmniscientTrapSetter
+from fedlearning.byzantine.trap import ModelReplaceAttacker, NonOmniscientTrapSetter, OmniscientTrapSetter
+from fedlearning.byzantine.traprop import TrapRopAttacker, TrapAlieAttacker
 
 attacker_registry = {
     "signflipping":             SignflippingAttacker,
@@ -16,6 +17,9 @@ attacker_registry = {
     
     "omniscient_trapsetter":    OmniscientTrapSetter,
     "nonomniscient_trapsetter": NonOmniscientTrapSetter,
+
+    "traprop":                  TrapRopAttacker,
+    "trapalie":                 TrapAlieAttacker
 }
 
 def init_attacker(config):

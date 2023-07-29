@@ -16,7 +16,7 @@ user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0
 # attacker model 
 attacker_model: "rop"
 PI: 120
-scaling_factor: 100
+rop_scaling_factor: 100
 
 # compressor
 compressor: "none"

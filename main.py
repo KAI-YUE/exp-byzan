@@ -52,7 +52,7 @@ def federated_learning(config, logger, record):
         for i, attacker_id in enumerate(attacker_ids):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, user_data_mapping[user_id])
-            updater.local_step(oracle=oracle, network=model,test_loader=test_loader, criterion=criterion, comm_round=comm_round)
+            updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model,test_loader=test_loader, criterion=criterion, comm_round=comm_round, momentum=global_updater.momentum)
 
             attacker_package = updater.uplink_transmit()
             if updater.complete_attack:
@@ -84,23 +84,24 @@ def main():
         "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
     ]
-    # # attackers = ["ipm", "alie"]
-    # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
+    # attackers = ["ipm", "alie"]
+    # attackers = ["signflipping"]
+    # # radius = [0.3]
+    # aggregators = ["krum", "trimmed_mean" ,"centeredclipping"]
     # # aggregators = ["mean"]
-    num_attackers = [2, 6, 10, 14]
+    # num_attackers = [2, 6, 10, 14]
 
     # for user_data_mapping in user_data_mappings:
+    # for attacker in attackers:
     #     for aggregator in aggregators:
     #         for num_att in num_attackers:
-    #             # config.radius = r
-    #             config.user_data_mapping = user_data_mapping
-    #             # config.attacker_model = attacker
-    #             config.aggregator = aggregator
+                # config.radius = r
+                # config.user_data_mapping = user_data_mapping
+                # config.attacker_model = attacker
+                # config.aggregator = aggregator
 
-    #             config.num_attackers = num_att
-    #             config.ipm_multiplier = (config.total_users-num_att)/num_att
-
+                # config.num_attackers = num_att
+                # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
     output_dir = init_outputfolder(config)
     logger = init_logger(config, output_dir, config.seed)
