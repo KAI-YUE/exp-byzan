@@ -82,43 +82,56 @@ def main():
     config = load_config()
     user_data_mappings = [
         "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
-        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
     ]
     # attackers = ["ipm", "alie"]
     # attackers = ["signflipping"]
     # # radius = [0.3]
-    # aggregators = ["krum", "trimmed_mean" ,"centeredclipping"]
-    # # aggregators = ["mean"]
-    # num_attackers = [2, 6, 10, 14]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
+    # aggregators = []
+    num_attackers = [14]
 
-    # for user_data_mapping in user_data_mappings:
+    alphas = [0.1, 0.2, 0.3, 0.4, 0.5]
+
+    for i, user_data_mapping in enumerate(user_data_mappings):
     # for attacker in attackers:
-    #     for aggregator in aggregators:
-    #         for num_att in num_attackers:
+        for aggregator in aggregators:
+            for num_att in num_attackers:
+                
+                if alphas[i] <= 0.4:
+                    config.attacker = "model_replace"
+                else:
+                    config.attacker = "sign_flipping"
+
                 # config.radius = r
-                # config.user_data_mapping = user_data_mapping
+                config.user_data_mapping = user_data_mapping
                 # config.attacker_model = attacker
-                # config.aggregator = aggregator
+                config.aggregator = aggregator
 
-                # config.num_attackers = num_att
-                # config.ipm_multiplier = (config.total_users-num_att)/num_att
+                config.num_attackers = num_att
+                config.ipm_multiplier = (config.total_users-num_att)/num_att
 
-    output_dir = init_outputfolder(config)
-    logger = init_logger(config, output_dir, config.seed)
+                output_dir = init_outputfolder(config)
+                logger = init_logger(config, output_dir, config.seed)
 
-    record = init_record(config)
+                record = init_record(config)
 
-    if config.device == "cuda":
-        torch.backends.cudnn.benchmark = True
+                if config.device == "cuda":
+                    torch.backends.cudnn.benchmark = True
 
-    start = time.time()
-    federated_learning(config, logger, record)
-    end = time.time()
+                start = time.time()
+                federated_learning(config, logger, record)
+                end = time.time()
 
-    logger.info("{:.3} mins has elapsed".format((end-start)/60))
-    save_record(record, output_dir)
+                logger.info("{:.3} mins has elapsed".format((end-start)/60))
+                save_record(record, output_dir)
 
-    logger.handlers.clear()
+                logger.handlers.clear()
 
 if __name__ == "__main__":
     main()
