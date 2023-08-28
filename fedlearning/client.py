@@ -1,6 +1,8 @@
 import copy
 import numpy as np
 
+import torch
+
 from fedlearning.buffer import WeightBuffer
 from fedlearning.compressors import compressor_registry
 from deeplearning.datasets import fetch_dataloader
@@ -65,6 +67,7 @@ class LocalUpdater(Client):
         tau_counter = 0
         break_flag = False
 
+        loss_trajectory = [] 
         while not break_flag:
             for i, contents in enumerate(self.data_loader):
                 self.optimizer.zero_grad()
@@ -77,6 +80,15 @@ class LocalUpdater(Client):
 
                 # Compute gradient and do SGD step
                 loss.backward()
+
+                #local dp setting
+                if self.config.ldp:
+                    clip(optimizer=self.optimizer, max_norm=self.config.local_bound)
+                    add_noise(optimizer=self.optimizer, max_norm=self.config.local_bound, 
+                              batch_size=self.config.batch_size, 
+                              std=self.config.local_std,
+                              device=self.device)
+
                 self.optimizer.step()
 
                 tau_counter += 1
@@ -84,11 +96,36 @@ class LocalUpdater(Client):
                     break_flag = True
                     break
 
+                # loss_trajectory.append(loss.item())
+
+        loss_trajectory.append(loss.item())
+
+        # return the last loss val?
+        return loss_trajectory
+
     def compute_delta(self):
         """Simulate the transmission of local gradients to the central server.
         """ 
         w_tau = WeightBuffer(self.local_model.state_dict())
         delta = self.w0 - w_tau
 
+        if self.config.ddp:
+            self.ddp(delta)
+
         return delta
     
+    def ddp(self, delta):
+        for w_name, w_val in delta._weight_dict.items():
+            # clip and add noise
+            delta._weight_dict[w_name].data = w_val.clamp(-self.config.bound, self.config.bound) 
+            # delta._weight_dict[w_name].data += self.config.std * torch.randn_like(w_val)
+
+
+def clip(optimizer, max_norm):
+    for i, w_val in enumerate(optimizer.param_groups[0]["params"]):
+        w_val.grad.data = torch.clamp(w_val.grad.data, -max_norm, max_norm)
+
+def add_noise(optimizer, max_norm, batch_size, std, device):
+    for i, w_val in enumerate(optimizer.param_groups[0]["params"]):
+        noise = std*torch.randn_like(w_val)
+        w_val.grad.data += max_norm * 2 / batch_size * noise
