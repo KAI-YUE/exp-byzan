@@ -14,13 +14,6 @@ user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0
 # user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
 
-# distance metric
-dist_metric: "kl"
-dist_metric: "corr"
-dist_metric: "wasserstein"
-# dist_metric: "l2"
-dist_metric: "cosine"
-
 # attacker model 
 attacker_model: "signflipping"
 # attacker_model: "omniscient_signflipping"

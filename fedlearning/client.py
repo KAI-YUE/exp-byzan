@@ -98,6 +98,8 @@ class LocalUpdater(Client):
 
                 # loss_trajectory.append(loss.item())
 
+        # loss_trajectory = [np.mean(np.asarray(loss_trajectory))]
+
         loss_trajectory.append(loss.item())
 
         # return the last loss val?

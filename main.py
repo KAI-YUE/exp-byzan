@@ -30,7 +30,10 @@ def federated_learning(config, logger, record):
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
 
     # distance measure for losses 
-    dist_metric = metric_registry[config.dist_metric]
+    # dist_metric = metric_registry[config.dist_metric]
+    dist_metrics = []
+    for key, value in metric_registry.items():
+        dist_metrics.append(value)
 
     # initialize the byzantine model
     ByzantineUpdater = init_attacker(config)
@@ -81,13 +84,14 @@ def federated_learning(config, logger, record):
         best_testacc = validate_and_log(config, model, dummy_train_loader, test_loader, criterion, comm_round, best_testacc, logger, record)
 
     # heterogeneity = 0.
-    heterogeneity = []
+    heterogeneities = [[] for i in range(len(dist_metrics))]
     loss_mat = np.asarray(loss_mat)
     # after the training, we are able to calculate the empirical heterogeneity over loss
     for i in range(loss_mat.shape[0]):
         for j in range(i+1, loss_mat.shape[0]):
             # heterogeneity += dist_metric(loss_mat[i], loss_mat[j])
-            heterogeneity.append(dist_metric(loss_mat[i], loss_mat[j]))
+            for k in range(len(dist_metrics)):
+                heterogeneities[k].append(dist_metrics[k](loss_mat[i], loss_mat[j]))
 
     # num_elements = loss_mat.shape[0]*(loss_mat.shape[0] - 1)/2
     # heterogeneity /= num_elements
@@ -95,22 +99,32 @@ def federated_learning(config, logger, record):
     # logger.info("The empirical {:s} heterogeneity over loss is {:.3f}".format(config.dist_metric, heterogeneity))
     # record["heterogeneity"] = heterogeneity
 
-    mean_hetero = np.mean(heterogeneity)
-    std_hetero = np.std(heterogeneity)
-    print("{:s}, {:.3f}, {:.3f}".format(config.dist_metric, mean_hetero, std_hetero))
+    for i, dist_metric in enumerate(metric_registry.keys()):
+        mean_hetero = np.mean(heterogeneities[i])
+        std_hetero = np.std(heterogeneities[i])
+        median_hetero = np.median(heterogeneities[i])
+        variation = std_hetero/mean_hetero
+        logger.info("{:s}\t\t {:.3f}\t {:.3f}\t {:.3f} \t {:.3f}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+
+    record["heterogeneity"] = heterogeneities
 
 
 def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
         "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.03/user_dataidx_map_0.03_0.dat",
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat"
+
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
@@ -121,7 +135,7 @@ def main():
     # # radius = [0.3]
     # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     aggregators = ["mean"]
-    aggregators = ["median"]
+    # aggregators = ["median"]
     # num_attackers = [14]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
