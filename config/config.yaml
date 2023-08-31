@@ -94,7 +94,7 @@ std: 0.
 ldp: True
 ldp: False
 local_bound: 1.
-local_std: 1000
+local_std: 10
 
 # Log configurations
 output_folder: "experiments"

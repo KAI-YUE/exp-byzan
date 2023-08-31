@@ -7,7 +7,7 @@ from deeplearning.metric.cosine import cosine_metric
 
 metric_registry = {
     "wasserstein":      wasserstein_metric,
-    "corr":             corr_metric,
+    # "corr":             corr_metric,
     "kl":               symmetric_kl_metric,
     "l2":               l2_metric,
     "cosine":           cosine_metric
