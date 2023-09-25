@@ -30,9 +30,8 @@ def federated_learning(config, logger, record):
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
 
     # obtain the attacker data loader
-    # attacker_data_loader = fetch_attacker_dataloader(config, dataset.dst_train, attacker_ids, user_data_mapping)
-    attacker_data_loader = test_loader
-
+    attacker_data_loader = fetch_attacker_dataloader(config, dataset.dst_train, attacker_ids, user_data_mapping)
+    # attacker_data_loader = test_loader
 
     # distance measure for losses 
     # dist_metric = metric_registry[config.dist_metric]
@@ -164,7 +163,7 @@ def main():
     # # radius = [0.3]
     # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     aggregators = ["mean"]
-    # aggregators = ["median"]
+    aggregators = ["median"]
     num_attackers = [2, 6, 10, 14]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
