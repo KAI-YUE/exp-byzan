@@ -29,6 +29,8 @@ scaling_factor: 0.1
 radius: 0.5
 change_target_freq: 1
 
+maxh_trial: 3
+
 # attacker_model: "traprop"
 # lambda1: 1.
 # lambda2: 1.

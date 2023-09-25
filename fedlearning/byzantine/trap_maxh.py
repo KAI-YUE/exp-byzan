@@ -6,7 +6,8 @@ import numpy as np
 from fedlearning.client import Client
 from fedlearning.buffer import WeightBuffer
 
-from deeplearning.utils import test
+from deeplearning.utils import data
+from deeplearning.metric import metric_registry
 from deeplearning.datasets import fetch_dataloader
 
 class TrapSetterMaxH(Client):
@@ -28,7 +29,7 @@ class TrapSetterMaxH(Client):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
-    def grid_search(self, network, test_loader, criterion):
+    def grid_search(self, network, data_loader, criterion):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -54,13 +55,13 @@ class TrapSetterMaxH(Client):
                 # so you can easily use in-place operations to move along dir_two
                 if i % 2 == 0:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = data(data_loader, network, criterion, self.config)
                     data_column.append(acc)
                     # data_column.append(loss)
                     cursor = cursor + dir_two
                 else:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = data(data_loader, network, criterion, self.config)
                     data_column.insert(0, acc)
                     # data_column.insert(0, loss)
                     cursor = cursor - dir_two
@@ -77,7 +78,7 @@ class TrapSetterMaxH(Client):
         start_point = start_point + dir_two
 
         network.load_state_dict(start_point._weight_dict)
-        acc, loss = test(test_loader, network, criterion, self.config)
+        acc, loss = data(data_loader, network, criterion, self.config)
 
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
@@ -118,16 +119,29 @@ class TrapSetterMaxH(Client):
                     break
 
 
-    def local_step(self, oracle, network, test_loader, criterion, comm_round, **kwargs):
+    def local_step(self, oracle, network, data_loader, criterion, comm_round, initial_attacker, **kwargs):
         backup_weight = copy.deepcopy(network.state_dict())
 
         if comm_round % self.config.change_target_freq == 0:
             # self.estimate_weight(criterion)
             # hypothetical_weight = self.local_model
             # network.load_state_dict(hypothetical_weight.state_dict())
-            self.target_w = self.grid_search(network, test_loader, criterion)
+            self.target_w = self.grid_search(network, data_loader, criterion)
 
-        # if kwargs["initial_attacker"] == True:
+        if initial_attacker == True:
+            attacker_loss_traj = self.obtain_loss_trajectory(data_loader, network, criterion)
+        else:
+            trajectories = [[] for i in range(self.config.maxh_trial)]
+            target_w_list = [] 
+            for i in range(self.config.maxh_trial):
+                self.target_w = self.grid_search(network, data_loader, criterion)
+                trajectories[i].extend(self.obtain_loss_trajectory(data_loader, network, criterion))
+                target_w_list.append(copy.deepcopy(self.target_w))
+
+            metric = metric_registry["consine"]
+            H = []
+            for 
+
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True
@@ -137,3 +151,26 @@ class TrapSetterMaxH(Client):
     def compute_delta(self):
         delta = (self.w0*(self.total_users/self.num_attacker) - self.interm_w)*self.scaling_factor 
         return delta
+
+
+    def obtain_loss_trajectory(self, data_loader, network, criterion):
+        initial_weight = WeightBuffer(network.state_dict())
+        gd_step = (initial_weight - self.target_w)*(1/self.config.tau)
+
+        for i, contents in enumerate(data_loader):
+            self.optimizer.zero_grad()
+            target = contents[1].to(self.device)
+            input = contents[0].to(self.device)
+            break
+        
+        loss_trajectory = []
+        for t in np.range(self.config.tau):
+            initial_weight = initial_weight + gd_step
+            network.load_state_dict(initial_weight._weight_dict)
+
+            output = network(input)
+            loss = criterion(output, target).mean()
+
+            loss_trajectory.append(loss.item())
+
+        return loss_trajectory
