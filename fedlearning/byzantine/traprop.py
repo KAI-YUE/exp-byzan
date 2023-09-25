@@ -27,7 +27,7 @@ class TrapSFAttacker(Client):
 
         self.lambda1, self.lambda2 = config.lambda1, config.lambda2
 
-    def local_step(self, network, test_loader, criterion, oracle, comm_round, **kwargs):
+    def local_step(self, network, data_loader, criterion, oracle, comm_round, **kwargs):
 
         # if comm_round % self.config.change_target_freq == 0:
         
@@ -42,7 +42,7 @@ class TrapSFAttacker(Client):
             # network.load_state_dict(self.local_model.state_dict())
         
         else:
-            self.target_w = self.grid_search(network, test_loader, criterion)
+            self.target_w = self.grid_search(network, data_loader, criterion)
 
             self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
             self.complete_attack = True
@@ -65,7 +65,7 @@ class TrapSFAttacker(Client):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
-    def grid_search(self, network, test_loader, criterion):
+    def grid_search(self, network, data_loader, criterion):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -91,13 +91,13 @@ class TrapSFAttacker(Client):
                 # so you can easily use in-place operations to move along dir_two
                 if i % 2 == 0:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = test(data_loader, network, criterion, self.config)
                     data_column.append(acc)
                     # data_column.append(loss)
                     cursor = cursor + dir_two
                 else:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = test(data_loader, network, criterion, self.config)
                     data_column.insert(0, acc)
                     # data_column.insert(0, loss)
                     cursor = cursor - dir_two
@@ -114,7 +114,7 @@ class TrapSFAttacker(Client):
         start_point = start_point + dir_two
 
         network.load_state_dict(start_point._weight_dict)
-        acc, loss = test(test_loader, network, criterion, self.config)
+        acc, loss = test(data_loader, network, criterion, self.config)
 
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
@@ -165,7 +165,7 @@ class TrapAlieAttacker(Client):
 
         self.lambda1, self.lambda2 = config.lambda1, config.lambda2
 
-    def local_step(self, benign_packages, network, test_loader, criterion, oracle, comm_round, **kwargs):
+    def local_step(self, benign_packages, network, data_loader, criterion, oracle, comm_round, **kwargs):
         layerwise_params = {}
         package_keys = list(benign_packages.keys())
         user_state_dict = benign_packages[package_keys[0]].state_dict()
@@ -196,10 +196,10 @@ class TrapAlieAttacker(Client):
             # self.estimate_weight(criterion)
             # hypothetical_weight = self.local_model
             # network.load_state_dict(hypothetical_weight.state_dict())
-            self.target_w = self.grid_search(network, test_loader, criterion)
+            self.target_w = self.grid_search(network, data_loader, criterion)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
-        self.complete_attack = True
+        # self.complete_attack = True
 
         network.load_state_dict(backup_weight)
 
@@ -217,7 +217,7 @@ class TrapAlieAttacker(Client):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
-    def grid_search(self, network, test_loader, criterion):
+    def grid_search(self, network, data_loader, criterion):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -243,13 +243,13 @@ class TrapAlieAttacker(Client):
                 # so you can easily use in-place operations to move along dir_two
                 if i % 2 == 0:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = test(data_loader, network, criterion, self.config)
                     data_column.append(acc)
                     # data_column.append(loss)
                     cursor = cursor + dir_two
                 else:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = test(data_loader, network, criterion, self.config)
                     data_column.insert(0, acc)
                     # data_column.insert(0, loss)
                     cursor = cursor - dir_two
@@ -266,7 +266,7 @@ class TrapAlieAttacker(Client):
         start_point = start_point + dir_two
 
         network.load_state_dict(start_point._weight_dict)
-        acc, loss = test(test_loader, network, criterion, self.config)
+        acc, loss = test(data_loader, network, criterion, self.config)
 
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
@@ -332,7 +332,7 @@ class TrapRopAttacker(Client):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
-    def grid_search(self, network, test_loader, criterion):
+    def grid_search(self, network, data_loader, criterion):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -358,13 +358,13 @@ class TrapRopAttacker(Client):
                 # so you can easily use in-place operations to move along dir_two
                 if i % 2 == 0:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = test(data_loader, network, criterion, self.config)
                     data_column.append(acc)
                     # data_column.append(loss)
                     cursor = cursor + dir_two
                 else:
                     network.load_state_dict(cursor._weight_dict)
-                    acc, loss = test(test_loader, network, criterion, self.config)
+                    acc, loss = test(data_loader, network, criterion, self.config)
                     data_column.insert(0, acc)
                     # data_column.insert(0, loss)
                     cursor = cursor - dir_two
@@ -381,7 +381,7 @@ class TrapRopAttacker(Client):
         start_point = start_point + dir_two
 
         network.load_state_dict(start_point._weight_dict)
-        acc, loss = test(test_loader, network, criterion, self.config)
+        acc, loss = test(data_loader, network, criterion, self.config)
 
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
@@ -412,14 +412,14 @@ class TrapRopAttacker(Client):
                     break
 
 
-    def local_step(self, oracle, network, test_loader, criterion, comm_round, momentum,**kwargs):
+    def local_step(self, oracle, network, data_loader, criterion, comm_round, momentum,**kwargs):
         backup_weight = copy.deepcopy(network.state_dict())
 
         if comm_round % self.config.change_target_freq == 0:
             # self.estimate_weight(criterion)
             # hypothetical_weight = self.local_model
             # network.load_state_dict(hypothetical_weight.state_dict())
-            self.target_w = self.grid_search(network, test_loader, criterion)
+            self.target_w = self.grid_search(network, data_loader, criterion)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True

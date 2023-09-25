@@ -96,11 +96,11 @@ class LocalUpdater(Client):
                     break_flag = True
                     break
 
-                # loss_trajectory.append(loss.item())
+                loss_trajectory.append(loss.item())
 
         # loss_trajectory = [np.mean(np.asarray(loss_trajectory))]
 
-        loss_trajectory.append(loss.item())
+        # loss_trajectory.append(loss.item())
 
         # return the last loss val?
         return loss_trajectory

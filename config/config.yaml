@@ -19,7 +19,7 @@ attacker_model: "signflipping"
 # attacker_model: "omniscient_signflipping"
 attacker_model: "ipm"
 ipm_multiplier: .8
-# attacker_model: "alie"
+attacker_model: "alie"
 # attacker_model: "model_replace"
 model_checkpoint: " "
 # attacker_model: "omniscient_trapsetter"

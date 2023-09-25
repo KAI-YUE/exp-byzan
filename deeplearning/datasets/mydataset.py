@@ -30,3 +30,16 @@ def fetch_dataloader(config, data, shuffle=True):
 
     return data_loader
 
+
+def fetch_attacker_dataloader(config, data, attacker_ids, user_data_mapping, shuffle=True):
+    if len(attacker_ids) == 0:
+        return None
+    
+    data_idx = []
+    for i, id in enumerate(attacker_ids):
+        data_idx.extend(user_data_mapping[id]) 
+
+    data_loader = DataLoader(MyDataset(data["images"][data_idx], data["labels"][data_idx]),
+                        shuffle=shuffle, batch_size=config.batch_size)
+
+    return data_loader
