@@ -173,7 +173,7 @@ def main():
 
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
     attackers = ["nonomniscient_trapsetter"]
-    attackers = ["trap_random"]
+    # attackers = ["trap_random"]
     # # radius = [0.3]
     # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     aggregators = ["mean"]
