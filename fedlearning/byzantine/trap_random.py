@@ -7,13 +7,13 @@ from fedlearning.client import Client
 from fedlearning.buffer import WeightBuffer
 
 from deeplearning.utils import test
-from deeplearning.metric import metric_registry
 from deeplearning.datasets import fetch_dataloader
 
-class TrapSetterMaxH(Client):
+
+class RandomTrapSetter(Client):
     r"""Computes the ``sample mean`` over the updates from all give clients."""
     def __init__(self, config, model, **kwargs):
-        super(TrapSetterMaxH, self).__init__(config, model, **kwargs)
+        super(RandomTrapSetter, self).__init__(config, model, **kwargs)
         # set up a target model an attacker wants to replace
         self.target_w = WeightBuffer(model.state_dict())
         self.total_users = config.total_users
@@ -30,7 +30,6 @@ class TrapSetterMaxH(Client):
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
     def grid_search(self, network, data_loader, criterion):
-        initial_weight = copy.deepcopy(network.state_dict())
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -84,7 +83,6 @@ class TrapSetterMaxH(Client):
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
 
-        network.load_state_dict(initial_weight)
         return start_point
 
     def set_target_model(self):
@@ -121,7 +119,7 @@ class TrapSetterMaxH(Client):
                     break
 
 
-    def local_step(self, oracle, network, data_loader, criterion, comm_round, reference_attacker, **kwargs):
+    def local_step(self, oracle, network, data_loader, criterion, comm_round, **kwargs):
         backup_weight = copy.deepcopy(network.state_dict())
 
         if comm_round % self.config.change_target_freq == 0:
@@ -130,59 +128,11 @@ class TrapSetterMaxH(Client):
             # network.load_state_dict(hypothetical_weight.state_dict())
             self.target_w = self.grid_search(network, data_loader, criterion)
 
-        if reference_attacker == True:
-            attacker_loss_traj = self.obtain_loss_trajectory(data_loader, network, criterion)
-        else:
-            attacker_loss_traj = kwargs["attacker_loss_traj"]
-            trajectories = [[] for i in range(self.config.maxh_trial)]
-            target_w_list = [] 
-            for i in range(self.config.maxh_trial):
-                self.target_w = self.grid_search(network, data_loader, criterion)
-                trajectories[i].extend(self.obtain_loss_trajectory(data_loader, network, criterion))
-                target_w_list.append(copy.deepcopy(self.target_w))
-
-            metric = metric_registry["l2"]
-            H = []
-            for i in range(self.config.maxh_trial):
-                H.append(metric(np.asarray(attacker_loss_traj), np.asarray(trajectories[i])))
-            
-            max_idx = np.argmax(H)
-            self.target_w = target_w_list[max_idx]
-            print(H)
-
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         # self.complete_attack = True
 
         network.load_state_dict(backup_weight)
 
-        return attacker_loss_traj
-
     def compute_delta(self):
         delta = (self.w0*(self.total_users/self.num_attacker) - self.interm_w)*self.scaling_factor 
         return delta
-
-
-    def obtain_loss_trajectory(self, data_loader, network, criterion):
-        weight_copy = copy.deepcopy(network.state_dict())
-        initial_weight = WeightBuffer(network.state_dict())
-        gd_step = (initial_weight - self.target_w)*(1/self.config.tau)
-
-        for i, contents in enumerate(data_loader):
-            self.optimizer.zero_grad()
-            target = contents[1].to(self.device)
-            input = contents[0].to(self.device)
-            break
-        
-        loss_trajectory = []
-        for t in range(self.config.tau):
-            initial_weight = initial_weight + gd_step
-            network.load_state_dict(initial_weight._weight_dict)
-
-            output = network(input)
-            loss = criterion(output, target).mean()
-
-            loss_trajectory.append(loss.item())
-
-        network.load_state_dict(weight_copy)
-
-        return loss_trajectory

@@ -90,12 +90,16 @@ def federated_learning(config, logger, record):
         # attack process 
         oracle = fedavg_oracle(benign_packages)
         attacker_packages = {}
+        reference_attacker, traj = True, None
         for i, attacker_id in enumerate(attacker_ids):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, user_data_mapping[user_id])
-            updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
                                data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
-                               momentum=global_updater.momentum)
+                               momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+                               attacker_loss_traj=traj)
+
+            reference_attacker = False
 
             attacker_package = updater.uplink_transmit()
             if updater.complete_attack:
@@ -159,42 +163,45 @@ def main():
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
     ]
 
-    # attackers = ["ipm", "alie"]
+    attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
+    attackers = ["nonomniscient_trapsetter"]
+    attackers = ["trap_random"]
     # # radius = [0.3]
     # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     aggregators = ["mean"]
     aggregators = ["median"]
     num_attackers = [2, 6, 10, 14]
+    num_attackers = [10]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
-        # for attacker in attackers:
-        for aggregator in aggregators:
-            for num_att in num_attackers:
+        for attacker in attackers:
+            for aggregator in aggregators:
+                for num_att in num_attackers:
 
-                # config.radius = r
-                config.user_data_mapping = user_data_mapping
-                # config.attacker_model = attacker
-                config.aggregator = aggregator
+                    # config.radius = r
+                    config.user_data_mapping = user_data_mapping
+                    config.attacker_model = attacker
+                    config.aggregator = aggregator
 
-                config.num_attackers = num_att
-                # config.ipm_multiplier = (config.total_users-num_att)/num_att
+                    config.num_attackers = num_att
+                    # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
-                output_dir = init_outputfolder(config)
-                logger = init_logger(config, output_dir, config.seed)
+                    output_dir = init_outputfolder(config)
+                    logger = init_logger(config, output_dir, config.seed)
 
-                record = init_record(config)
+                    record = init_record(config)
 
-                if config.device == "cuda":
-                    torch.backends.cudnn.benchmark = True
+                    if config.device == "cuda":
+                        torch.backends.cudnn.benchmark = True
 
-                start = time.time()
-                federated_learning(config, logger, record)
-                end = time.time()
+                    start = time.time()
+                    federated_learning(config, logger, record)
+                    end = time.time()
 
-                logger.info("{:.3} mins has elapsed".format((end-start)/60))
-                save_record(record, output_dir)
+                    logger.info("{:.3} mins has elapsed".format((end-start)/60))
+                    save_record(record, output_dir)
 
-                logger.handlers.clear()
+                    logger.handlers.clear()
 
 if __name__ == "__main__":
     main()
