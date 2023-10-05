@@ -6,7 +6,7 @@ import torch
 from fedlearning.buffer import WeightBuffer
 from fedlearning.compressors import compressor_registry
 from deeplearning.datasets import fetch_dataloader
-from deeplearning.utils import init_optimizer, AverageMeter
+from deeplearning.utils import init_optimizer, accuracy
 
 class Client(object):
     def __init__(self, config, model, **kwargs):
@@ -20,6 +20,7 @@ class Client(object):
         self.config = config
         self.complete_attack = False
         self.init_compressor(config)
+        self.powerful = False
 
     def init_local_dataset(self, *args):
         pass
@@ -67,7 +68,7 @@ class LocalUpdater(Client):
         tau_counter = 0
         break_flag = False
 
-        loss_trajectory = [] 
+        loss_trajectory, acc_trajectory = [], [] 
         while not break_flag:
             for i, contents in enumerate(self.data_loader):
                 self.optimizer.zero_grad()
@@ -77,6 +78,8 @@ class LocalUpdater(Client):
                 # Compute output
                 output = self.local_model(input)
                 loss = criterion(output, target).mean()
+                
+                acc = accuracy(output.data, target, topk=(1,))[0]
 
                 # Compute gradient and do SGD step
                 loss.backward()
@@ -97,13 +100,14 @@ class LocalUpdater(Client):
                     break
 
                 loss_trajectory.append(loss.item())
+                acc_trajectory.append(acc.item())
 
         # loss_trajectory = [np.mean(np.asarray(loss_trajectory))]
 
-        loss_trajectory.append(loss.item())
+        # loss_trajectory.append(loss.item())
 
         # return the last loss val?
-        return loss_trajectory
+        return loss_trajectory, acc_trajectory
 
     def compute_delta(self):
         """Simulate the transmission of local gradients to the central server.

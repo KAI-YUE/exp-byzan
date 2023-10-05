@@ -27,39 +27,63 @@ class TrapSFAttacker(Client):
 
         self.lambda1, self.lambda2 = config.lambda1, config.lambda2
 
-    def local_step(self, network, data_loader, criterion, oracle, comm_round, **kwargs):
+    def local_step(self, oracle, network, data_loader, criterion, comm_round, powerful=True, **kwargs):
+        backup_weight = copy.deepcopy(network.state_dict())
 
-        # if comm_round % self.config.change_target_freq == 0:
-        
-        if comm_round > 10:
-            self.estimate_weight(criterion)
-            # self.neg_delta = WeightBuffer(self.local_model.state_dict()) - self.w0
-            self.delta = WeightBuffer(self.local_model.state_dict()) - self.w0
-            # self.delta = self.w0 - delta
+        # powerful = False
 
-            # return
+        if powerful:
+            if comm_round % self.config.change_target_freq == 0:
+                # self.estimate_weight(criterion)
+                # hypothetical_weight = self.local_model
+                # network.load_state_dict(hypothetical_weight.state_dict())
+                self.target_w, self.powerful = self.grid_search(network, data_loader, criterion)
 
-            # network.load_state_dict(self.local_model.state_dict())
-        
+            if self.powerful:
+                self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
+                self.complete_attack = True
+
+                network.load_state_dict(backup_weight)
+
         else:
-            self.target_w = self.grid_search(network, data_loader, criterion)
+            self.powerful = False
+            tau_counter = 0
+            break_flag = False
 
-            self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
-            self.complete_attack = True
+            while not break_flag:
+                for i, contents in enumerate(self.data_loader):
+                    self.optimizer.zero_grad()
+                    target = contents[1].to(self.device)
+                    input = contents[0].to(self.device)
 
-            network.load_state_dict(self.w0._weight_dict)
+                    # Compute output
+                    output = self.local_model(input)
+                    loss = criterion(output, target).mean()
 
-            self.delta = (self.w0*(self.total_users/self.num_attacker) - self.interm_w)*self.scaling_factor 
+                    # Compute gradient and do SGD step
+                    loss.backward()
+                    self.optimizer.step()
 
-        # for w_name, w_val in self.delta._weight_dict.items():
-        #     self.delta._weight_dict[w_name] = self.lambda1*self.neg_delta._weight_dict[w_name] + self.lambda2*w_val
+                    tau_counter += 1
+                    if tau_counter >= self.tau:
+                        break_flag = True
+                        break
 
-        # self.delta = trap_delta
-        # self.lambda1 *= 1.04
-        # self.lambda2 *= 0.99
         
     def compute_delta(self):
-        return self.delta
+        if self.powerful:
+            print("*"*80)
+            print("use trap")
+            delta = (self.w0*(self.total_users/self.num_attacker) - self.interm_w)*self.scaling_factor 
+            return delta
+        
+        else:
+            print("*"*80)
+            print("use sf")
+            w_tau = WeightBuffer(self.local_model.state_dict())
+            delta = w_tau - self.w0
+
+            return delta
     
     def init_local_dataset(self, dataset, data_idx):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
@@ -119,7 +143,15 @@ class TrapSFAttacker(Client):
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
 
-        return start_point
+        acc_range = np.max(data_matrix.flatten()) - np.min(data_matrix.flatten())
+        print("range of acc {:.3f}".format(acc_range))
+
+        if acc_range < self.config.threshold:
+            powerful = False
+        else:
+            powerful = True
+
+        return start_point, powerful
 
     def estimate_weight(self, criterion, **kwargs):
         tau_counter = 0
@@ -199,7 +231,7 @@ class TrapAlieAttacker(Client):
             self.target_w = self.grid_search(network, data_loader, criterion)
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
-        # self.complete_attack = True
+        self.complete_attack = True
 
         network.load_state_dict(backup_weight)
 

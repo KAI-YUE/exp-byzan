@@ -7,6 +7,8 @@ from fedlearning.byzantine.traprop import TrapRopAttacker, TrapAlieAttacker, Tra
 from fedlearning.byzantine.trap_maxh import TrapSetterMaxH
 from fedlearning.byzantine.trap_random import RandomTrapSetter
 
+from fedlearning import LocalUpdater
+
 attacker_registry = {
     "signflipping":             SignflippingAttacker,
     "omniscient_signflipping":  OmniscientSignflippingAttacker,
@@ -24,7 +26,9 @@ attacker_registry = {
     "traprop":                  TrapRopAttacker,
     "trapalie":                 TrapAlieAttacker,
     "trapsf":                   TrapSFAttacker,
-    "trap_random":              RandomTrapSetter
+    "trap_random":              RandomTrapSetter,
+
+    "benign":                   LocalUpdater,
 }
 
 def init_attacker(config):

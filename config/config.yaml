@@ -105,3 +105,7 @@ test_interval: 1
 print_every:   20
 log_level:   "INFO"
 log_file:    "./train.log"
+
+
+threshold: 1
+# p: 0.9
