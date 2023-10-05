@@ -26,8 +26,8 @@ model_checkpoint: " "
 attacker_model: "nonomniscient_trapsetter"
 # model_checkpoint: ""
 # attacker_model: "max_h"
-scaling_factor: 0.01
-radius: 0.01
+scaling_factor: 0.1
+radius: 0.1
 change_target_freq: 1
 
 maxh_trial: 5

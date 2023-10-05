@@ -186,22 +186,23 @@ class NonOmniscientTrapSetter(Client):
                 if i % 2 == 0:
                     network.load_state_dict(cursor._weight_dict)
                     acc, loss = test(data_loader, network, criterion, self.config)
-                    data_column.append(acc)
-                    # data_column.append(loss)
+                    # data_column.append(acc)
+                    data_column.append(loss)
                     cursor = cursor + dir_two
                 else:
                     network.load_state_dict(cursor._weight_dict)
                     acc, loss = test(data_loader, network, criterion, self.config)
-                    data_column.insert(0, acc)
-                    # data_column.insert(0, loss)
+                    # data_column.insert(0, acc)
+                    data_column.insert(0, loss)
                     cursor = cursor - dir_two
 
             data_matrix.append(data_column)
             cursor = cursor + dir_one
 
         data_matrix = np.asarray(data_matrix)
-        low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
-        
+        # low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
+        low_acc_idx = np.unravel_index(np.argmax(data_matrix), data_matrix.shape)
+
         print(low_acc_idx)
         dir_one, dir_two = dir_one*low_acc_idx[0], dir_two*low_acc_idx[1]
         start_point = start_point + dir_one
@@ -212,6 +213,7 @@ class NonOmniscientTrapSetter(Client):
 
         print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
         print("actual acc {:.3f}".format(acc))
+        print("Loss {:.3f}".format(loss))
 
         return start_point
 

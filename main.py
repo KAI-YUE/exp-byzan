@@ -95,11 +95,11 @@ def federated_learning(config, logger, record):
         powerful = True
         # powerful = False
 
-        indices = []
-        for i, attacker_id in enumerate(attacker_ids):
-            indices.extend(user_data_mapping[attacker_id])
+        # indices = []
+        # for i, attacker_id in enumerate(attacker_ids):
+        #     indices.extend(user_data_mapping[attacker_id])
         # random_attacker_idx = np.random.randint(0, len(attacker_ids), 1)[0]
-        # indices = user_data_mapping[attacker_ids[0]]
+        indices = user_data_mapping[attacker_ids[0]]
 
         for i, attacker_id in enumerate(attacker_ids):
             # powerful = True if comm_round%2 == 0 else False
@@ -190,8 +190,7 @@ def main():
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
     attackers = ["nonomniscient_trapsetter"]
     # attackers = ["trapsf"]
-    # attackers = ["signflipping"]
-    # attackers = ["signflipping"]
+    attackers = ["signflipping"]
     # # radius = [0.3]
     # aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     aggregators = ["mean"]
