@@ -26,8 +26,8 @@ model_checkpoint: " "
 attacker_model: "nonomniscient_trapsetter"
 # model_checkpoint: ""
 # attacker_model: "max_h"
-scaling_factor: 0.1
-radius: 0.1
+scaling_factor: 0.01
+radius: 1.e-2
 change_target_freq: 1
 
 maxh_trial: 5
@@ -66,6 +66,7 @@ aggregator: "median"
 cc_bound: 10
 
 store_momentum: True
+store_momentum: False
 
 # aggregator: "vote"
 global_lr: 1.

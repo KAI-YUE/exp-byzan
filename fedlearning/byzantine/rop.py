@@ -10,7 +10,7 @@ class RopAttacker(Client):
         super(RopAttacker, self).__init__(config, model, **kwargs)
         self.num_users = config.total_users
         self.PI = config.PI/180 * np.pi # convert degrees to radians
-        self.scaling_factor = config.scaling_factor
+        self.scaling_factor = config.rop_scaling_factor
 
     def local_step(self, momentum=None, **kwargs):
         if momentum is None:

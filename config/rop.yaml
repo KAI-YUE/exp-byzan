@@ -56,3 +56,15 @@ test_interval: 1
 print_every:   20
 log_level:   "INFO"
 log_file:    "./train.log"
+
+# DDP setup
+ddp: True
+ddp: False
+bound: 1.e-6
+std: 0.
+
+# local dp setup
+ldp: True
+ldp: False
+local_bound: 1.
+local_std: 10

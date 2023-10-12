@@ -6,6 +6,9 @@ from fedlearning.byzantine.trap import ModelReplaceAttacker, NonOmniscientTrapSe
 from fedlearning.byzantine.traprop import TrapRopAttacker, TrapAlieAttacker, TrapSFAttacker
 from fedlearning.byzantine.trap_maxh import TrapSetterMaxH
 from fedlearning.byzantine.trap_random import RandomTrapSetter
+from fedlearning.byzantine.dir_trap import DirTrapSetter
+from fedlearning.byzantine.perturb import Perturb
+
 
 from fedlearning import LocalUpdater
 
@@ -27,8 +30,10 @@ attacker_registry = {
     "trapalie":                 TrapAlieAttacker,
     "trapsf":                   TrapSFAttacker,
     "trap_random":              RandomTrapSetter,
+    "dir_trap":                 DirTrapSetter,
 
     "benign":                   LocalUpdater,
+    "perturb":                  Perturb,
 }
 
 def init_attacker(config):

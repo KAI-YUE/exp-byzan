@@ -7,6 +7,7 @@ from fedlearning.buffer import WeightBuffer
 from fedlearning.compressors import compressor_registry
 from deeplearning.datasets import fetch_dataloader
 from deeplearning.utils import init_optimizer, accuracy
+from deeplearning.utils import test
 
 class Client(object):
     def __init__(self, config, model, **kwargs):
@@ -23,7 +24,7 @@ class Client(object):
         self.powerful = False
 
     def init_local_dataset(self, *args):
-        pass
+        self.data_loader = None
 
     def init_compressor(self, config):
         if config.compressor in compressor_registry.keys():
@@ -65,6 +66,9 @@ class LocalUpdater(Client):
         Args,
             model(nn.module):       the global model
         """
+        # acc, loss = test(self.data_loader, self.local_model, criterion, self.config)
+        # print("Client initial acc: {:.3f}".format(acc))
+
         tau_counter = 0
         break_flag = False
 
