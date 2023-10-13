@@ -159,7 +159,7 @@ class NonOmniscientTrapSetter(Client):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
-    def grid_search(self, network, data_loader, criterion):
+    def grid_search(self, network, data_loader, criterion, logger=None):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -215,6 +215,8 @@ class NonOmniscientTrapSetter(Client):
         print("actual acc {:.3f}".format(acc))
         print("Loss {:.3f}".format(loss))
 
+        logger.info("Range: {:3f}".format(np.max(data_matrix.flatten()) - np.min(data_matrix.flatten())))
+
         return start_point
 
     def set_target_model(self):
@@ -252,6 +254,9 @@ class NonOmniscientTrapSetter(Client):
 
 
     def local_step(self, oracle, network, data_loader, criterion, comm_round, **kwargs):
+        # obtain logger
+        logger = kwargs.get("logger", None)
+
         backup_weight = copy.deepcopy(network.state_dict())
 
         acc, loss = test(data_loader, network, criterion, self.config)
@@ -259,7 +264,7 @@ class NonOmniscientTrapSetter(Client):
 
         # approximate the oracle
         network.load_state_dict(self.target_w.state_dict())
-        oracle = self.estimate_oracle(criterion)
+        oracle = self.estimate_oracle(criterion, data_loader)
 
         # network.load_state_dict(self.local_model.state_dict())
 
@@ -267,8 +272,17 @@ class NonOmniscientTrapSetter(Client):
             # self.estimate_weight(criterion)
             # hypothetical_weight = self.local_model
             # network.load_state_dict(hypothetical_weight.state_dict())
-            self.target_w = self.grid_search(network, data_loader, criterion)
+            # self.target_w = self.grid_search(network, data_loader, criterion, logger)
 
+            # self.grid_search(network, data_loader, criterion, logger)
+            self.target_w = self.grid_search(network, data_loader, criterion, logger)
+            # network.load_state_dict(self.target_w.state_dict())
+            
+            # noise = WeightBuffer(network.state_dict(), mode="rand")
+            # noise = noise * (1.e-1)
+            # self.target_w = WeightBuffer(network.state_dict(), mode="copy")
+            
+            # self.target_w = WeightBuffer(network.state_dict(), mode="copy")
 
         self.interm_w = self.target_w*(self.total_users/self.num_attacker) + oracle*(self.num_benign/(self.num_attacker*self.scaling_factor))
         self.complete_attack = True
@@ -276,13 +290,16 @@ class NonOmniscientTrapSetter(Client):
         network.load_state_dict(backup_weight)
 
 
-    def estimate_oracle(self, criterion):
+    def estimate_oracle(self, criterion, data_loader=None):
+        if data_loader is None:
+            data_loader = self.data_loader
+
         tau_counter = 0
         break_flag = False
 
         # loss_trajectory, acc_trajectory = [], [] 
         while not break_flag:
-            for i, contents in enumerate(self.data_loader):
+            for i, contents in enumerate(data_loader):
                 self.optimizer.zero_grad()
                 target = contents[1].to(self.device)
                 input = contents[0].to(self.device)
@@ -295,6 +312,12 @@ class NonOmniscientTrapSetter(Client):
 
                 # Compute gradient and do SGD step
                 loss.backward()
+
+                # add_noise(optimizer=self.optimizer, max_norm=self.config.local_bound, 
+                #     batch_size=self.config.batch_size, 
+                #     std=self.config.local_std,
+                #     device=self.device)
+
 
                 self.optimizer.step()
 

@@ -8,7 +8,7 @@ from fedlearning.byzantine.trap_maxh import TrapSetterMaxH
 from fedlearning.byzantine.trap_random import RandomTrapSetter
 from fedlearning.byzantine.dir_trap import DirTrapSetter
 from fedlearning.byzantine.perturb import Perturb
-
+from fedlearning.byzantine.minmax import MinMax
 
 from fedlearning import LocalUpdater
 
@@ -19,6 +19,8 @@ attacker_registry = {
     "ipm":                      IPMAttacker,
     "alie":                     AlieAttacker,
     "rop":                      RopAttacker, 
+
+    "minmax":                   MinMax,
 
     "model_replace":            ModelReplaceAttacker,
     

@@ -95,41 +95,40 @@ def federated_learning(config, logger, record):
         powerful = True
         # powerful = False
 
-        # indices = []
-        # for i, attacker_id in enumerate(attacker_ids[:3]):
-        #     indices.extend(user_data_mapping[attacker_id])
-        # for i, attacker_id in enumerate(user_ids[:1]):
-        #     indices.extend(user_data_mapping[attacker_id])
+        indices = []
+        for i, attacker_id in enumerate(attacker_ids[3:4]):
+            indices.extend(user_data_mapping[attacker_id])
 
+        # for i, attacker_id in enumerate(user_ids):
+        #     indices.extend(user_data_mapping[attacker_id])
 
         # random_attacker_idx = np.random.randint(0, len(attacker_ids), 1)[0]
         # indices = user_data_mapping[attacker_ids[random_attacker_idx]]
-        # random_attacker_idx = np.random.randint(0, len(user_ids), 1)[0]
-        # indices = user_data_mapping[user_ids[random_attacker_idx]]
         
         # indices = user_data_mapping[attacker_ids[0]]
 
         for i, attacker_id in enumerate(attacker_ids):
             # powerful = True if comm_round%2 == 0 else False
 
-            indices = user_data_mapping[attacker_id]
+            # indices = user_data_mapping[attacker_id]
 
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, indices)
+
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
             #                    data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
             #                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #                    attacker_loss_traj=traj, powerful=powerful)
-            
-            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-                    data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
-                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-                    attacker_loss_traj=traj, powerful=powerful)
+            #                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
             
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-            #         data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
+            #         data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
             #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #         attacker_loss_traj=traj, powerful=powerful)
+            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            
+            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+                    data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
+                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
 
 
             powerful = updater.powerful
@@ -214,16 +213,22 @@ def main():
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
     attackers = ["nonomniscient_trapsetter"]
     # attackers = ["omniscient_trapsetter"]
-    attackers = ["perturb"]
+    attackers = ["signflipping"]
+    # attackers = ["dir_trap"]
+    # attackers = ["perturb"]
+    attackers = ["minmax"]
 
     # # radius = [0.3]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
     # aggregators = ["centeredclipping"]
-    # aggregators = ["mean"]
+    aggregators = ["mean"]
     aggregators = ["median"]
+    # aggregators = ["signguard"]
+    # aggregators = ["dnc"]
 
     num_attackers = [6, 10]
-    # num_attackers = [10]
+    num_attackers = [10]
+    # num_attackers = [6]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:

@@ -131,13 +131,20 @@ class DirTrapSetter(Client):
 
         # approximate the oracle
         network.load_state_dict(self.target_w.state_dict())
-        oracle = self.estimate_oracle(criterion)
+        oracle = self.estimate_oracle(criterion, data_loader)
 
         if comm_round % self.config.change_target_freq == 0:
             # self.estimate_weight(criterion)
             # hypothetical_weight = self.local_model
             # network.load_state_dict(hypothetical_weight.state_dict())
+            # dir_one = oracle * (-1)
+            # if kwargs["momentum"] is None:
+            #     dir_one = oracle * (-1)
+            # else:
+            #     dir_one = kwargs["momentum"] * (-1)
+
             dir_one = oracle * (-1)
+
             self.target_w = self.grid_search(network, data_loader, criterion, dir_one=dir_one)
 
 
@@ -147,13 +154,16 @@ class DirTrapSetter(Client):
         network.load_state_dict(backup_weight)
 
 
-    def estimate_oracle(self, criterion):
+    def estimate_oracle(self, criterion, data_loader=None):
+        if data_loader is None:
+            data_loader = self.data_loader
+
         tau_counter = 0
         break_flag = False
 
         # loss_trajectory, acc_trajectory = [], [] 
         while not break_flag:
-            for i, contents in enumerate(self.data_loader):
+            for i, contents in enumerate(data_loader):
                 self.optimizer.zero_grad()
                 target = contents[1].to(self.device)
                 input = contents[0].to(self.device)

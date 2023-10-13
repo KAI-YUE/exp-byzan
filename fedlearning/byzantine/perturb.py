@@ -30,18 +30,19 @@ class Perturb(Client):
         acc, loss = test(data_loader, network, criterion, self.config)
         print("Initial acc: {:.3f}".format(acc))
 
-        acc, loss = test(data_loader, network, criterion, self.config)
-        print("Initial acc: {:.3f}".format(acc))
+        # approximate the oracle
+        network.load_state_dict(self.target_w.state_dict())
+        oracle = self.estimate_oracle(criterion, data_loader)
 
         if comm_round % self.config.change_target_freq == 0:
             # noise = WeightBuffer(network.state_dict(), mode="rand")
-            # noise = noise * (1.e-3)
+            # noise = noise * (1.e-2)
             # self.target_w = noise + WeightBuffer(network.state_dict(), mode="copy")
             self.target_w = WeightBuffer(network.state_dict(), mode="copy")
 
-        network.load_state_dict(self.target_w._weight_dict)
-        acc, loss = test(data_loader, network, criterion, self.config)
-        print("Initial acc: {:.3f}".format(acc))
+        # network.load_state_dict(self.target_w._weight_dict)
+        # acc, loss = test(data_loader, network, criterion, self.config)
+        # print("Initial acc: {:.3f}".format(acc))
 
         network.load_state_dict(backup_weight)
 
@@ -50,14 +51,16 @@ class Perturb(Client):
 
         network.load_state_dict(backup_weight)
 
+    def estimate_oracle(self, criterion, data_loader=None):
+        if data_loader is None:
+            data_loader = self.data_loader
 
-    def estimate_oracle(self, criterion):
         tau_counter = 0
         break_flag = False
 
         # loss_trajectory, acc_trajectory = [], [] 
         while not break_flag:
-            for i, contents in enumerate(self.data_loader):
+            for i, contents in enumerate(data_loader):
                 self.optimizer.zero_grad()
                 target = contents[1].to(self.device)
                 input = contents[0].to(self.device)

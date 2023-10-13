@@ -5,6 +5,8 @@ from .trimmedmean import TrimmedMean
 from .centerclipping import CenteredClipping
 from .vote import Vote
 from .momentum import MeanMomentum
+from .signguard import SignGuard
+from .dnc import DnC
 
 aggregator_registry = {
     "mean":             Mean,
@@ -16,4 +18,7 @@ aggregator_registry = {
     "vote":             Vote,
 
     "mean_momentum":    MeanMomentum,
+    "signguard":        SignGuard,
+
+    "dnc":              DnC,
 }
