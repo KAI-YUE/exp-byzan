@@ -31,8 +31,8 @@ class Perturb(Client):
         print("Initial acc: {:.3f}".format(acc))
 
         # approximate the oracle
-        network.load_state_dict(self.target_w.state_dict())
-        oracle = self.estimate_oracle(criterion, data_loader)
+        # network.load_state_dict(self.target_w.state_dict())
+        # oracle = self.estimate_oracle(criterion, data_loader)
 
         if comm_round % self.config.change_target_freq == 0:
             # noise = WeightBuffer(network.state_dict(), mode="rand")

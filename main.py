@@ -96,7 +96,7 @@ def federated_learning(config, logger, record):
         # powerful = False
 
         indices = []
-        for i, attacker_id in enumerate(attacker_ids[3:4]):
+        for i, attacker_id in enumerate(attacker_ids[:1]):
             indices.extend(user_data_mapping[attacker_id])
 
         # for i, attacker_id in enumerate(user_ids):
@@ -120,15 +120,15 @@ def federated_learning(config, logger, record):
             #                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
             #                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
             
-            # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-            #         data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
-            #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
-            
             traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-                    data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
+                    data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
                     momentum=global_updater.momentum, reference_attacker=reference_attacker, 
                     attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            
+            # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+            #         data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
+            #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
 
 
             powerful = updater.powerful
@@ -185,7 +185,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -196,7 +196,7 @@ def main():
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
 
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
@@ -211,24 +211,24 @@ def main():
     ]
 
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
-    attackers = ["nonomniscient_trapsetter"]
+    # attackers = ["nonomniscient_trapsetter"]
     # attackers = ["omniscient_trapsetter"]
-    attackers = ["signflipping"]
+    # attackers = ["signflipping"]
     # attackers = ["dir_trap"]
     # attackers = ["perturb"]
-    attackers = ["minmax"]
+    attackers = ["ipm"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
     # aggregators = ["centeredclipping"]
-    aggregators = ["mean"]
+    # aggregators = ["mean"]
     aggregators = ["median"]
     # aggregators = ["signguard"]
     # aggregators = ["dnc"]
 
     num_attackers = [6, 10]
-    num_attackers = [10]
-    # num_attackers = [6]
+    # num_attackers = [2, 6, 10, 14]
+    num_attackers = [14]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
