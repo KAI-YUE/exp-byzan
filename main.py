@@ -27,6 +27,11 @@ def federated_learning(config, logger, record):
     dataset = fetch_dataset(config)
     dummy_train_loader = fetch_dataloader(config, dataset.dst_train)
     test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=False)
+    
+    # craft a small validation dataset for the server 
+    subval = fetch_subset(dataset.dst_train, size=1000)
+    val_loader = fetch_dataloader(config, subval, shuffle=False)
+    
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
 
     # obtain the attacker data loader
@@ -42,12 +47,12 @@ def federated_learning(config, logger, record):
     # initialize the byzantine model
     ByzantineUpdater = init_attacker(config)
 
-    global_updater = GlobalUpdater(config)
+    global_updater = GlobalUpdater(config, data_loader=val_loader)
     fedavg_oracle = BenignFedAvg(num_users=config.total_users - config.num_attackers)
     
     # loss_mat = np.zeros((config.total_users-config.num_attackers, config.rounds))
     loss_mat = []
-    for i in range(config.total_users-config.num_attackers):
+    for i in range(config.total_users - config.num_attackers):
         loss_mat.append([])
 
     best_testacc = 0.
