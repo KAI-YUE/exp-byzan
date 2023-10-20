@@ -19,8 +19,9 @@ class GlobalUpdater(object):
         
         if config.aggregator == "hybrid":
             self.hybrid = True
-            # agg_candidates = ["mean", "median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
-            agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+            agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
+            # agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+            
             self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates]
             self.agg_candidates = agg_candidates
         else:

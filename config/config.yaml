@@ -2,10 +2,10 @@
 device: cuda
 seed: 3002
 random_agg: True
-# random_agg: False
+random_agg: False
 
 # distributed settings
-rounds: 50
+rounds: 40
 total_users: 31
 num_attackers: 0
 part_rate: 1
