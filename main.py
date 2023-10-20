@@ -120,15 +120,15 @@ def federated_learning(config, logger, record):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, indices)
 
-            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-                               data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
-                               momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-                               attacker_loss_traj=traj, powerful=powerful, logger=logger)
-            
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-            #         data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
-            #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            #                    data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
+            #                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+            #                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            
+            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+                    data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
+                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
             
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
             #         data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
