@@ -1,6 +1,8 @@
 # device: "cuda" | "cpu"
 device: cuda
 seed: 3002
+random_agg: True
+# random_agg: False
 
 # distributed settings
 rounds: 50

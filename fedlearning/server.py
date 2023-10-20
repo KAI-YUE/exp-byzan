@@ -19,7 +19,8 @@ class GlobalUpdater(object):
         
         if config.aggregator == "hybrid":
             self.hybrid = True
-            agg_candidates = ["mean", "median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+            # agg_candidates = ["mean", "median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+            agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
             self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates]
             self.agg_candidates = agg_candidates
         else:
@@ -32,13 +33,21 @@ class GlobalUpdater(object):
 
         self.criterion = kwargs["criterion"]
         self.config = config
+        self.random_agg = config.random_agg
 
     def global_step(self, model, benign_packages, attacker_packages, **kwargs):
         # merge benign and attacker packages, as we assume the server does not know which client is attacker
         benign_packages.update(attacker_packages)
 
-        
-        if self.hybrid:
+        if self.random_agg:
+            benign_packages.update(attacker_packages)
+            idx = np.random.randint(0, len(self.agg_candidates))
+
+            accumulated_delta = self.aggregators[idx](benign_packages)
+            global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
+            model.load_state_dict(global_weight.state_dict())
+
+        elif self.hybrid:
             backup_weight = copy.deepcopy(model.state_dict())
             val_acc = []
 
