@@ -3,7 +3,7 @@ device: cuda
 seed: 3002
 
 # distributed settings
-rounds: 40
+rounds: 50
 total_users: 31
 num_attackers: 0
 part_rate: 1

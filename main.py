@@ -29,7 +29,7 @@ def federated_learning(config, logger, record):
     test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=False)
     
     # craft a small validation dataset for the server 
-    subval = fetch_subset(dataset.dst_train, size=1000)
+    subval = fetch_subset(dataset.dst_train, size=100)
     val_loader = fetch_dataloader(config, subval, shuffle=False)
     
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
@@ -47,7 +47,7 @@ def federated_learning(config, logger, record):
     # initialize the byzantine model
     ByzantineUpdater = init_attacker(config)
 
-    global_updater = GlobalUpdater(config, data_loader=val_loader)
+    global_updater = GlobalUpdater(config, data_loader=val_loader, criterion=criterion)
     fedavg_oracle = BenignFedAvg(num_users=config.total_users - config.num_attackers)
     
     # loss_mat = np.zeros((config.total_users-config.num_attackers, config.rounds))
@@ -157,7 +157,7 @@ def federated_learning(config, logger, record):
             loss_mat.append([])
 
         # Update the global model
-        global_updater.global_step(model, benign_packages, attacker_packages, record=record)
+        global_updater.global_step(model, benign_packages, attacker_packages, record=record, logger=logger)
 
         # Validate the model performance and log
         best_testacc = validate_and_log(config, model, dummy_train_loader, test_loader, criterion, comm_round, best_testacc, logger, record)
@@ -190,7 +190,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -201,7 +201,7 @@ def main():
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
-        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
 
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
@@ -216,12 +216,13 @@ def main():
     ]
 
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
+    attackers = ["ipm", "alie", "signflipping", "perturb", "minmax"]
     # attackers = ["nonomniscient_trapsetter"]
     # attackers = ["omniscient_trapsetter"]
     # attackers = ["signflipping"]
     # attackers = ["dir_trap"]
     # attackers = ["perturb"]
-    attackers = ["ipm"]
+    # attackers = ["signflipping"]
 
     # # radius = [0.3]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
@@ -233,7 +234,7 @@ def main():
 
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
-    num_attackers = [14]
+    num_attackers = [2, 6, 10, 14]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
