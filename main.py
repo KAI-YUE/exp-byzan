@@ -221,11 +221,11 @@ def main():
     # attackers = ["omniscient_trapsetter"]
     # attackers = ["signflipping"]
     # attackers = ["dir_trap"]
-    # attackers = ["perturb"]
+    attackers = ["perturb", "signflipping"]
     # attackers = ["signflipping"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
     # aggregators = ["centeredclipping"]
     # aggregators = ["mean"]
     aggregators = ["median"]
@@ -235,7 +235,7 @@ def main():
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
     num_attackers = [2, 6, 10, 14]
-    # num_attackers = [14]
+    num_attackers = [14]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:

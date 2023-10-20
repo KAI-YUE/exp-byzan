@@ -20,9 +20,12 @@ class GlobalUpdater(object):
         if config.aggregator == "hybrid":
             self.hybrid = True
             # agg_candidates = ["mean", "median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
-            agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+            agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
             self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates]
             self.agg_candidates = agg_candidates
+            
+            # add rejection rule
+            self.prev_acc = 0.
         else:
             self.hybrid = False
             self.aggregator = aggregator_registry[config.aggregator](config)
@@ -65,6 +68,14 @@ class GlobalUpdater(object):
 
             max_acc_idx = np.argmax(val_acc)
             kwargs["logger"].info("max acc: {:s} {:.4f}".format(self.agg_candidates[max_acc_idx], val_acc[max_acc_idx]))
+
+            max_acc = val_acc[max_acc_idx]
+
+            # add a line of rejection rule
+            # if max_acc < self.prev_acc:
+            #     return None
+            
+            # self.prev_acc = max_acc
 
             accumulated_delta = self.aggregators[max_acc_idx](benign_packages)
             global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
