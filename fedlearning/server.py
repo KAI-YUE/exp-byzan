@@ -61,6 +61,12 @@ class GlobalUpdater(object):
             global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
             model.load_state_dict(global_weight.state_dict())
 
+        else:
+            benign_packages.update(attacker_packages)
+
+            accumulated_delta = self.aggregator(benign_packages)
+            global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
+            model.load_state_dict(global_weight.state_dict())
 
 
     @property
