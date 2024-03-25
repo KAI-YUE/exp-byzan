@@ -107,7 +107,10 @@ class LocalUpdater(Client):
 
                 loss_trajectory.append(loss.item())
                 acc_trajectory.append(acc.item())
-                weight_norm_traj.append(calculate_weight_norms(self.local_model))
+
+                weight_norms = calculate_weight_norms(self.local_model)
+        
+        weight_norm_traj.append(list(weight_norms.values()))
 
         # loss_trajectory = [np.mean(np.asarray(loss_trajectory))]
 
@@ -165,7 +168,8 @@ class SimpleNN(nn.Module):
 model = SimpleNN()
 
 # Function to calculate weight norms
-def calculate_weight_norms(model, p='fro'):
+def calculate_weight_norms(model, p=2):
+# def calculate_weight_norms(model, p='fro'):
     """
     Calculate the norm of weights for each layer in the neural network.
 

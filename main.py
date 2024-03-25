@@ -52,11 +52,14 @@ def federated_learning(config, logger, record):
     
     # loss_mat = np.zeros((config.total_users-config.num_attackers, config.rounds))
     loss_mat = []
+    total_heterogeneities = []
     for i in range(config.total_users - config.num_attackers):
         loss_mat.append([])
+        total_heterogeneities.append([])
 
     best_testacc = 0.
     heterogeneities_mean, heterogeneities_std = [[] for i in range(len(dist_metrics))], [[] for i in range(len(dist_metrics))] 
+
 
     # ref = None
     for comm_round in range(start_round, config.rounds):
@@ -64,33 +67,44 @@ def federated_learning(config, logger, record):
         for i, user_id in enumerate(user_ids):
             updater = LocalUpdater(config, model)
             updater.init_local_dataset(dataset, user_data_mapping[user_id])
-            local_loss, local_acc = updater.local_step(criterion)
+            # local_loss, local_acc = updater.local_step(criterion)
             
             # loss_mat[i, comm_round] = local_loss
             # loss_mat[i].extend(local_loss)
-            loss_mat[i].extend(local_acc)
+            # loss_mat[i].extend(local_acc)
+
+            local_loss, weight_norm = updater.local_step(criterion)
+            weight_norm_array = np.asarray(weight_norm)
+            loss_mat[i].extend(weight_norm_array[:, config.layer_idx])
+            
+            total_heterogeneities[i].append(np.mean(weight_norm_array[:, config.layer_idx])) # every user reports one value per round
 
             local_package = updater.uplink_transmit()
             benign_packages[user_id] = local_package
 
-        heterogeneities = [[] for i in range(len(dist_metrics))]
-        loss_mat_arr = np.asarray(loss_mat)
-        # after the training, we are able to calculate the empirical heterogeneity over loss
-        for ii in range(loss_mat_arr.shape[0]):
-            for jj in range(ii+1, loss_mat_arr.shape[0]):
-                for kk in range(len(dist_metrics)):
-                    heterogeneities[kk].append(dist_metrics[kk](loss_mat_arr[ii], loss_mat_arr[jj]))
 
-        for l, dist_metric in enumerate(metric_registry.keys()):
-            mean_hetero = np.mean(heterogeneities[l])
-            std_hetero = np.std(heterogeneities[l])
-            median_hetero = np.median(heterogeneities[l])
-            variation = std_hetero/mean_hetero
+        # =========== for local training 
+        # heterogeneities = [[] for i in range(len(dist_metrics))]
+        # loss_mat_arr = np.asarray(loss_mat)
+        # # after the training, we are able to calculate the empirical heterogeneity over loss
+        # for ii in range(loss_mat_arr.shape[0]):
+        #     for jj in range(ii+1, loss_mat_arr.shape[0]):
+        #         for kk in range(len(dist_metrics)):
+        #             heterogeneities[kk].append(dist_metrics[kk](loss_mat_arr[ii], loss_mat_arr[jj]))
+
+        # logger.info("median \t mean \t std \t variation")
+        # for l, dist_metric in enumerate(metric_registry.keys()):
+        #     mean_hetero = np.mean(heterogeneities[l])
+        #     std_hetero = np.std(heterogeneities[l])
+        #     median_hetero = np.median(heterogeneities[l])
+        #     variation = std_hetero/mean_hetero
             
-            heterogeneities_mean[l].append(mean_hetero)
-            heterogeneities_std[l].append(std_hetero)
-            
-            logger.info("{:s}\t\t {:.3f}\t {:.3f}\t {:.3f} \t {:.3f}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+        #     heterogeneities_mean[l].append(mean_hetero)
+        #     heterogeneities_std[l].append(std_hetero)
+           
+        #     logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+
+
 
         # =============================================
         # attack process 
@@ -170,21 +184,24 @@ def federated_learning(config, logger, record):
     # logger.info("The empirical {:s} heterogeneity over loss is {:.3f}".format(config.dist_metric, heterogeneity))
     # record["heterogeneity"] = heterogeneity
 
-    # for i, dist_metric in enumerate(metric_registry.keys()):
-    #     mean_hetero = np.mean(heterogeneities[i])
-    #     std_hetero = np.std(heterogeneities[i])
-    #     median_hetero = np.median(heterogeneities[i])
-    #     variation = std_hetero/mean_hetero
-    #     logger.info("{:s}\t\t {:.3f}\t {:.3f}\t {:.3f} \t {:.3f}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
 
-    heterogeneities_mean = np.asarray(heterogeneities_mean)
-    heterogeneities_std = np.asarray(heterogeneities_std)
-    record["heterogeneity_mean"] = heterogeneities_mean
-    record["heterogeneity_std"] = heterogeneities_std
-
+    # if we consider total heterogeneity
+    heterogeneities = total_heterogeneities
     for i, dist_metric in enumerate(metric_registry.keys()):
-        mean, std = np.mean(heterogeneities_mean[i]), np.mean(heterogeneities_std[i])
-        logger.info("{:s}\t {:.3f}\t {:.3f}\t ({:.3f})".format(dist_metric, mean, std, std/mean))
+        mean_hetero = np.mean(heterogeneities[i])
+        std_hetero = np.std(heterogeneities[i])
+        median_hetero = np.median(heterogeneities[i])
+        variation = std_hetero/mean_hetero
+        logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+
+    # heterogeneities_mean = np.asarray(heterogeneities_mean)
+    # heterogeneities_std = np.asarray(heterogeneities_std)
+    # record["heterogeneity_mean"] = heterogeneities_mean
+    # record["heterogeneity_std"] = heterogeneities_std
+
+    # for i, dist_metric in enumerate(metric_registry.keys()):
+    #     mean, std = np.mean(heterogeneities_mean[i]), np.mean(heterogeneities_std[i])
+    #     logger.info("{:s}\t {:.3e}\t {:.3e}\t ({:.3e})".format(dist_metric, mean, std, std/mean))
 
 def main():
     # load the config file, logger, and initialize the output folder
@@ -237,35 +254,35 @@ def main():
     num_attackers = [2, 6, 10, 14]
     num_attackers = [14]
 
-    for i, user_data_mapping in enumerate(user_data_mappings):
-        for attacker in attackers:
-            for aggregator in aggregators:
-                for num_att in num_attackers:
+    # for i, user_data_mapping in enumerate(user_data_mappings):
+    #     for attacker in attackers:
+    #         for aggregator in aggregators:
+    #             for num_att in num_attackers:
 
-                    # config.radius = r
-                    config.user_data_mapping = user_data_mapping
-                    config.attacker_model = attacker
-                    config.aggregator = aggregator
+    # config.radius = r
+    # config.user_data_mapping = user_data_mapping
+    # config.attacker_model = attacker
+    # config.aggregator = aggregator
 
-                    config.num_attackers = num_att
-                    # config.ipm_multiplier = (config.total_users-num_att)/num_att
+    # config.num_attackers = num_att
+    # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
-                    output_dir = init_outputfolder(config)
-                    logger = init_logger(config, output_dir, config.seed)
+    output_dir = init_outputfolder(config)
+    logger = init_logger(config, output_dir, config.seed)
 
-                    record = init_record(config)
+    record = init_record(config)
 
-                    if config.device == "cuda":
-                        torch.backends.cudnn.benchmark = True
+    if config.device == "cuda":
+        torch.backends.cudnn.benchmark = True
 
-                    start = time.time()
-                    federated_learning(config, logger, record)
-                    end = time.time()
+    start = time.time()
+    federated_learning(config, logger, record)
+    end = time.time()
 
-                    logger.info("{:.3} mins has elapsed".format((end-start)/60))
-                    save_record(record, output_dir)
+    logger.info("{:.3} mins has elapsed".format((end-start)/60))
+    save_record(record, output_dir)
 
-                    logger.handlers.clear()
+    logger.handlers.clear()
 
 if __name__ == "__main__":
     main()

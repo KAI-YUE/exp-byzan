@@ -5,23 +5,23 @@ random_agg: True
 random_agg: False
 
 # distributed settings
-rounds: 40
+rounds: 5
 total_users: 31
 num_attackers: 0
 part_rate: 1
-user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat"
-# user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.2_0.dat"
-# user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat"
-user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
-# user_data_mapping: "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
+user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat"
+# user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.2_0.dat"
+# user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat"
+user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat"
+# user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
 
 # attacker model 
 attacker_model: "signflipping"
 # attacker_model: "omniscient_signflipping"
 attacker_model: "ipm"
-ipm_multiplier: .1
-attacker_model: "alie"
+ipm_multiplier: 100
+# attacker_model: "alie"
 # attacker_model: "model_replace"
 model_checkpoint: " "
 # attacker_model: "omniscient_trapsetter"
@@ -87,9 +87,9 @@ checkpoint_path: ""
 
 # Simulation dataset configurations
 dataset: "fmnist"
-data_path: "/mnt/ex-ssd/Datasets/fmnist/"
+data_path: "/mnt/ssd/Datasets/fmnist/"
 # dataset: "cifar10"
-# data_path: "/mnt/ex-ssd/Datasets/cifar10/"
+# data_path: "/mnt/ssd/Datasets/cifar10/"
 
 # DDP setup
 ddp: True
@@ -113,3 +113,6 @@ log_file:    "./train.log"
 
 threshold: 1
 # p: 0.9
+
+
+layer_idx: 0
