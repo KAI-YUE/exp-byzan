@@ -25,7 +25,7 @@ attacker_model: "alie"
 # attacker_model: "model_replace"
 model_checkpoint: " "
 # attacker_model: "omniscient_trapsetter"
-attacker_model: "nonomniscient_trapsetter"
+# attacker_model: "nonomniscient_trapsetter"
 # model_checkpoint: ""
 # attacker_model: "max_h"
 scaling_factor: 1.e-2

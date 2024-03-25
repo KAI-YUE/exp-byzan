@@ -67,8 +67,8 @@ def federated_learning(config, logger, record):
             local_loss, local_acc = updater.local_step(criterion)
             
             # loss_mat[i, comm_round] = local_loss
-            loss_mat[i].extend(local_loss)
-            # loss_mat[i].extend(local_acc)
+            # loss_mat[i].extend(local_loss)
+            loss_mat[i].extend(local_acc)
 
             local_package = updater.uplink_transmit()
             benign_packages[user_id] = local_package
@@ -221,11 +221,11 @@ def main():
     # attackers = ["omniscient_trapsetter"]
     # attackers = ["signflipping"]
     # attackers = ["dir_trap"]
-    # attackers = ["perturb"]
-    attackers = ["signflipping", "perturb"]
+    attackers = ["perturb", "signflipping"]
+    # attackers = ["signflipping"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
     # aggregators = ["centeredclipping"]
     # aggregators = ["mean"]
     aggregators = ["median"]

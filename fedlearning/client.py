@@ -72,7 +72,8 @@ class LocalUpdater(Client):
         tau_counter = 0
         break_flag = False
 
-        loss_trajectory, acc_trajectory = [], [] 
+        loss_trajectory, acc_trajectory = [], []
+        weight_norm_traj = []
         while not break_flag:
             for i, contents in enumerate(self.data_loader):
                 self.optimizer.zero_grad()
@@ -96,6 +97,7 @@ class LocalUpdater(Client):
                               std=self.config.local_std,
                               device=self.device)
 
+
                 self.optimizer.step()
 
                 tau_counter += 1
@@ -105,13 +107,15 @@ class LocalUpdater(Client):
 
                 loss_trajectory.append(loss.item())
                 acc_trajectory.append(acc.item())
+                weight_norm_traj.append(calculate_weight_norms(self.local_model))
 
         # loss_trajectory = [np.mean(np.asarray(loss_trajectory))]
 
         # loss_trajectory.append(loss.item())
 
         # return the last loss val?
-        return loss_trajectory, acc_trajectory
+        # return loss_trajectory, acc_trajectory
+        return loss_trajectory, weight_norm_traj
 
     def compute_delta(self):
         """Simulate the transmission of local gradients to the central server.
@@ -139,3 +143,43 @@ def add_noise(optimizer, max_norm, batch_size, std, device):
     for i, w_val in enumerate(optimizer.param_groups[0]["params"]):
         noise = std*torch.randn_like(w_val)
         w_val.grad.data += max_norm * 2 / batch_size * noise
+
+
+import torch
+import torch.nn as nn
+
+# Example neural network
+class SimpleNN(nn.Module):
+    def __init__(self):
+        super(SimpleNN, self).__init__()
+        self.fc1 = nn.Linear(10, 20)  # First layer
+        self.relu = nn.ReLU()
+        self.fc2 = nn.Linear(20, 10)  # Second layer
+
+    def forward(self, x):
+        x = self.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+# Initialize the network
+model = SimpleNN()
+
+# Function to calculate weight norms
+def calculate_weight_norms(model, p='fro'):
+    """
+    Calculate the norm of weights for each layer in the neural network.
+
+    Args:
+    - model: The PyTorch neural network model.
+    - p: The order of the norm (can be 'fro', 'l1', 'l2', etc.). Defaults to 'fro' for Frobenius norm.
+
+    Returns:
+    A dictionary with layer names as keys and their corresponding weight norms as values.
+    """
+    weight_norms = {}
+    for name, param in model.named_parameters():
+        if 'weight' in name:  # Filtering to include only weights (not biases)
+            norm = torch.norm(param, p=p).item()
+            weight_norms[name] = norm
+    return weight_norms
+
