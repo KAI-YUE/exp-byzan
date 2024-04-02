@@ -84,25 +84,25 @@ def federated_learning(config, logger, record):
 
 
         # =========== for local training 
-        # heterogeneities = [[] for i in range(len(dist_metrics))]
-        # loss_mat_arr = np.asarray(loss_mat)
-        # # after the training, we are able to calculate the empirical heterogeneity over loss
-        # for ii in range(loss_mat_arr.shape[0]):
-        #     for jj in range(ii+1, loss_mat_arr.shape[0]):
-        #         for kk in range(len(dist_metrics)):
-        #             heterogeneities[kk].append(dist_metrics[kk](loss_mat_arr[ii], loss_mat_arr[jj]))
+        heterogeneities = [[] for i in range(len(dist_metrics))]
+        loss_mat_arr = np.asarray(loss_mat)
+        # after the training, we are able to calculate the empirical heterogeneity over loss
+        for ii in range(loss_mat_arr.shape[0]):
+            for jj in range(ii+1, loss_mat_arr.shape[0]):
+                for kk in range(len(dist_metrics)):
+                    heterogeneities[kk].append(dist_metrics[kk](loss_mat_arr[ii], loss_mat_arr[jj]))
 
-        # logger.info("median \t mean \t std \t variation")
-        # for l, dist_metric in enumerate(metric_registry.keys()):
-        #     mean_hetero = np.mean(heterogeneities[l])
-        #     std_hetero = np.std(heterogeneities[l])
-        #     median_hetero = np.median(heterogeneities[l])
-        #     variation = std_hetero/mean_hetero
+        logger.info("median \t mean \t std \t variation")
+        for l, dist_metric in enumerate(metric_registry.keys()):
+            mean_hetero = np.mean(heterogeneities[l])
+            std_hetero = np.std(heterogeneities[l])
+            median_hetero = np.median(heterogeneities[l])
+            variation = std_hetero/mean_hetero
             
-        #     heterogeneities_mean[l].append(mean_hetero)
-        #     heterogeneities_std[l].append(std_hetero)
+            heterogeneities_mean[l].append(mean_hetero)
+            heterogeneities_std[l].append(std_hetero)
            
-        #     logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+            logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
 
 
 
@@ -194,51 +194,51 @@ def federated_learning(config, logger, record):
         variation = std_hetero/mean_hetero
         logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
 
-    # heterogeneities_mean = np.asarray(heterogeneities_mean)
-    # heterogeneities_std = np.asarray(heterogeneities_std)
-    # record["heterogeneity_mean"] = heterogeneities_mean
-    # record["heterogeneity_std"] = heterogeneities_std
+    heterogeneities_mean = np.asarray(heterogeneities_mean)
+    heterogeneities_std = np.asarray(heterogeneities_std)
+    record["heterogeneity_mean"] = heterogeneities_mean
+    record["heterogeneity_std"] = heterogeneities_std
 
-    # for i, dist_metric in enumerate(metric_registry.keys()):
-    #     mean, std = np.mean(heterogeneities_mean[i]), np.mean(heterogeneities_std[i])
-    #     logger.info("{:s}\t {:.3e}\t {:.3e}\t ({:.3e})".format(dist_metric, mean, std, std/mean))
+    for i, dist_metric in enumerate(metric_registry.keys()):
+        mean, std = np.mean(heterogeneities_mean[i]), np.mean(heterogeneities_std[i])
+        logger.info("{:s}\t {:.3e}\t {:.3e}\t ({:.3e})".format(dist_metric, mean, std, std/mean))
 
 def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
-        # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
-        # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
-        # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
+        # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
+        # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.1/user_dataidx_map_0.10_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
+        "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
 
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.03/user_dataidx_map_0.03_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.03/user_dataidx_map_0.03_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
     ]
 
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
-    attackers = ["ipm", "alie", "signflipping", "perturb", "minmax"]
+    attackers = ["alie", "signflipping"]
     # attackers = ["nonomniscient_trapsetter"]
     # attackers = ["omniscient_trapsetter"]
     # attackers = ["signflipping"]
     # attackers = ["dir_trap"]
-    attackers = ["perturb", "signflipping"]
+    # attackers = ["perturb", "signflipping"]
     # attackers = ["signflipping"]
 
     # # radius = [0.3]
@@ -251,38 +251,45 @@ def main():
 
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
-    num_attackers = [2, 6, 10, 14]
-    num_attackers = [14]
+    num_attackers = [0, 6, 10, 14]
+    # num_attackers = [14]
 
-    # for i, user_data_mapping in enumerate(user_data_mappings):
-    #     for attacker in attackers:
+    layer_idxs = [0, 1, 2, 3]
+
+    # for layer_idx in layer_idxs:
+    #     config.layer_idx = layer_idx
+
+    for i, user_data_mapping in enumerate(user_data_mappings):
+    # for attacker in attackers:
     #         for aggregator in aggregators:
-    #             for num_att in num_attackers:
+    # for num_att in num_attackers:
 
     # config.radius = r
-    # config.user_data_mapping = user_data_mapping
+        config.user_data_mapping = user_data_mapping
     # config.attacker_model = attacker
     # config.aggregator = aggregator
 
-    # config.num_attackers = num_att
+    
     # config.ipm_multiplier = (config.total_users-num_att)/num_att
+        
+        # config.num_attackers = num_att
 
-    output_dir = init_outputfolder(config)
-    logger = init_logger(config, output_dir, config.seed)
+        output_dir = init_outputfolder(config)
+        logger = init_logger(config, output_dir, config.seed)
 
-    record = init_record(config)
+        record = init_record(config)
 
-    if config.device == "cuda":
-        torch.backends.cudnn.benchmark = True
+        if config.device == "cuda":
+            torch.backends.cudnn.benchmark = True
 
-    start = time.time()
-    federated_learning(config, logger, record)
-    end = time.time()
+        start = time.time()
+        federated_learning(config, logger, record)
+        end = time.time()
 
-    logger.info("{:.3} mins has elapsed".format((end-start)/60))
-    save_record(record, output_dir)
+        logger.info("{:.3} mins has elapsed".format((end-start)/60))
+        save_record(record, output_dir)
 
-    logger.handlers.clear()
+        logger.handlers.clear()
 
 if __name__ == "__main__":
     main()

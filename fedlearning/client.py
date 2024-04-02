@@ -109,8 +109,7 @@ class LocalUpdater(Client):
                 acc_trajectory.append(acc.item())
 
                 weight_norms = calculate_weight_norms(self.local_model)
-        
-        weight_norm_traj.append(list(weight_norms.values()))
+                weight_norm_traj.append(list(weight_norms.values()))
 
         # loss_trajectory = [np.mean(np.asarray(loss_trajectory))]
 
