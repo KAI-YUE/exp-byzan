@@ -243,11 +243,6 @@ def main():
 
     # # radius = [0.3]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-    # aggregators = ["centeredclipping"]
-    # aggregators = ["mean"]
-    aggregators = ["median"]
-    # aggregators = ["signguard"]
-    aggregators = ["hybrid"]
 
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
