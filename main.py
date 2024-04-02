@@ -190,13 +190,19 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
         # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
+        # for windows
+        r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
+        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.30_0.dat",
+        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.50_0.dat",
+        r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
+
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.1/user_dataidx_map_0.10_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
@@ -221,7 +227,7 @@ def main():
     # attackers = ["omniscient_trapsetter"]
     # attackers = ["signflipping"]
     # attackers = ["dir_trap"]
-    attackers = ["perturb", "signflipping"]
+    # attackers = ["perturb", "signflipping"]s
     # attackers = ["signflipping"]
 
     # # radius = [0.3]
@@ -230,7 +236,8 @@ def main():
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
     num_attackers = [2, 6, 10, 14]
-    num_attackers = [14]
+    # num_attackers = [14]
+    num_attackers = np.array([0., 0.1, 0.2, 0.3, 0.4])*30
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
@@ -242,7 +249,7 @@ def main():
                     config.attacker_model = attacker
                     config.aggregator = aggregator
 
-                    config.num_attackers = num_att
+                    config.num_attackers = int(num_att)
                     # config.ipm_multiplier = (config.total_users-num_att)/num_att
 
                     output_dir = init_outputfolder(config)
