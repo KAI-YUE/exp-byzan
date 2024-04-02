@@ -225,12 +225,7 @@ def main():
     # attackers = ["signflipping"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-    # aggregators = ["centeredclipping"]
-    # aggregators = ["mean"]
-    aggregators = ["median"]
-    # aggregators = ["signguard"]
-    aggregators = ["hybrid"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc", "hybrid"]
 
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
