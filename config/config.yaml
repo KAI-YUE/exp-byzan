@@ -6,7 +6,7 @@ random_agg: False
 eva_size: 10
 
 # distributed settings
-rounds: 5
+rounds: 100
 total_users: 31
 num_attackers: 0
 part_rate: 1
@@ -89,7 +89,8 @@ checkpoint_path: ""
 
 # Simulation dataset configurations
 dataset: "fmnist"
-data_path: "/mnt/ssd/Datasets/fmnist/"
+# data_path: "/mnt/ex-ssd/Datasets/fmnist/"
+data_path: "D:\\YUE\\Datasets\\fmnist"
 # dataset: "cifar10"
 # data_path: "/mnt/ssd/Datasets/cifar10/"
 
