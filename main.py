@@ -29,7 +29,7 @@ def federated_learning(config, logger, record):
     test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=False)
     
     # craft a small validation dataset for the server 
-    subval = fetch_subset(dataset.dst_train, size=10)
+    subval = fetch_subset(dataset.dst_train, size=config.eva_size)
     val_loader = fetch_dataloader(config, subval, shuffle=False)
     
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
@@ -232,14 +232,7 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
     ]
 
-    attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
-    attackers = ["alie", "signflipping"]
-    # attackers = ["nonomniscient_trapsetter"]
-    # attackers = ["omniscient_trapsetter"]
-    # attackers = ["signflipping"]
-    # attackers = ["dir_trap"]
-    # attackers = ["perturb", "signflipping"]
-    # attackers = ["signflipping"]
+    attackers = ["alie", "ipm", "minmax", "signflipping"]
 
     # # radius = [0.3]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
