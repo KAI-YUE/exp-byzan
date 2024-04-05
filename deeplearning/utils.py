@@ -18,10 +18,18 @@ def init_all(config, dataset, logger):
     # load checkpoint if the path exists
     if os.path.exists(config.checkpoint_path):
         checkpoint = torch.load(config.checkpoint_path)
-        network.load_state_dict(checkpoint['state_dict'])
-        start_round = checkpoint['comm_round']
-        logger.info("=> loaded checkpoint '{}' (comm. round {})"
-                    .format(config.checkpoint_path, start_round))
+        
+        try:
+            network.load_state_dict(checkpoint['state_dict'])
+            start_round = checkpoint['comm_round']
+            logger.info("=> loaded checkpoint '{}' (comm. round {})"
+                        .format(config.checkpoint_path, start_round))
+        except:
+            # network.load_state_dict(checkpoint) # for compatibility
+            # may freeze layers for transfer learning
+            freeze_layer(network, 2)
+            start_round = 0 
+
     else:
         start_round = 0
 
@@ -156,3 +164,10 @@ def accuracy(output, target, topk=(1,)):
         return res
 
 
+def freeze_layer(model, num_layers):
+    ct = 0
+    for child in model.children():
+        ct += 1
+        if ct <= num_layers:
+            for param in child.parameters():
+                param.requires_grad = False

@@ -29,7 +29,7 @@ def federated_learning(config, logger, record):
     test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=False)
     
     # craft a small validation dataset for the server 
-    subval = fetch_subset(dataset.dst_train, size=10)
+    subval = fetch_subset(dataset.dst_train, size=config.eva_size, config=config)
     val_loader = fetch_dataloader(config, subval, shuffle=False)
     
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
@@ -83,7 +83,7 @@ def federated_learning(config, logger, record):
             benign_packages[user_id] = local_package
 
 
-        # =========== for local training 
+        # =========== for local training =========== 
         heterogeneities = [[] for i in range(len(dist_metrics))]
         loss_mat_arr = np.asarray(loss_mat)
         # after the training, we are able to calculate the empirical heterogeneity over loss
@@ -184,7 +184,6 @@ def federated_learning(config, logger, record):
     # logger.info("The empirical {:s} heterogeneity over loss is {:.3f}".format(config.dist_metric, heterogeneity))
     # record["heterogeneity"] = heterogeneity
 
-
     # if we consider total heterogeneity
     heterogeneities = total_heterogeneities
     for i, dist_metric in enumerate(metric_registry.keys()):
@@ -207,18 +206,18 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.1/user_dataidx_map_0.10_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
-        "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
 
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
@@ -230,10 +229,12 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
+    
+        "/mnt/ssd/Datasets/user_with_data/uci_har/user_dataidx_map_0.dat"
     ]
 
     attackers = ["ipm", "alie", "signflipping", "nonomniscient_trapsetter"]
-    attackers = ["alie", "signflipping"]
+    # attackers = ["alie", "signflipping"]
     # attackers = ["nonomniscient_trapsetter"]
     # attackers = ["omniscient_trapsetter"]
     # attackers = ["signflipping"]
@@ -242,12 +243,13 @@ def main():
     # attackers = ["signflipping"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
+    aggregators = ["centeredclipping",  "dnc", "krum", "median", "signguard", "trimmed_mean"]
 
     num_attackers = [6, 10]
     # num_attackers = [2, 6, 10, 14]
-    num_attackers = [0, 6, 10, 14]
+    # num_attackers = [0, 6, 10, 14]
     # num_attackers = [14]
+    num_attackers = np.arange(5) * 0.1 * 30
 
     layer_idxs = [0, 1, 2, 3]
 
@@ -255,36 +257,33 @@ def main():
     #     config.layer_idx = layer_idx
 
     for i, user_data_mapping in enumerate(user_data_mappings):
-    # for attacker in attackers:
-    #         for aggregator in aggregators:
-    # for num_att in num_attackers:
+        for attacker in attackers:
+            for aggregator in aggregators:
+                for num_att in num_attackers:
 
-    # config.radius = r
-        config.user_data_mapping = user_data_mapping
-    # config.attacker_model = attacker
-    # config.aggregator = aggregator
-
-    
-    # config.ipm_multiplier = (config.total_users-num_att)/num_att
+                    config.user_data_mapping = user_data_mapping
+                    config.attacker_model = attacker
+                    config.aggregator = aggregator
         
-        # config.num_attackers = num_att
+                    config.num_attackers = int(num_att)
 
-        output_dir = init_outputfolder(config)
-        logger = init_logger(config, output_dir, config.seed)
+                    output_dir = init_outputfolder(config)
+                    logger = init_logger(config, output_dir, config.seed)
 
-        record = init_record(config)
+                    record = init_record(config)
 
-        if config.device == "cuda":
-            torch.backends.cudnn.benchmark = True
+                    if config.device == "cuda":
+                        torch.backends.cudnn.benchmark = True
 
-        start = time.time()
-        federated_learning(config, logger, record)
-        end = time.time()
+                    start = time.time()
+                    federated_learning(config, logger, record)
+                    end = time.time()
 
-        logger.info("{:.3} mins has elapsed".format((end-start)/60))
-        save_record(record, output_dir)
+                    logger.info("{:.3} mins has elapsed".format((end-start)/60))
+                    save_record(record, output_dir)
 
-        logger.handlers.clear()
+                    logger.handlers.clear()
+
 
 if __name__ == "__main__":
     main()
