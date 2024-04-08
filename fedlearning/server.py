@@ -55,7 +55,12 @@ class GlobalUpdater(object):
             val_acc = []
 
             for i, agg in enumerate(self.aggregators):
-                accumulated_delta = agg(benign_packages)
+                try:
+                    accumulated_delta = agg(benign_packages)
+                except:
+                    print("agg {:s} failed".format(self.agg_candidates[i]))
+                    continue
+                
                 global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
                 model.load_state_dict(global_weight.state_dict())
             
