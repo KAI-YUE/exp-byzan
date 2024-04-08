@@ -3,7 +3,7 @@ device: cuda
 seed: 3002
 random_agg: True
 random_agg: False
-eva_size: 10
+eva_size: 100
 
 # distributed settings
 rounds: 100
@@ -51,6 +51,12 @@ maxh_trial: 5
 # radius: 0.1
 # change_target_freq: 1
 
+# attacker model 
+attacker_model: "rop"
+PI: 120
+rop_scaling_factor: 100
+
+
 # attacker_model: "trapsf"
 lambda1: 1.
 lambda2: 10.
@@ -89,8 +95,8 @@ checkpoint_path: ""
 
 # Simulation dataset configurations
 dataset: "fmnist"
-# data_path: "/mnt/ex-ssd/Datasets/fmnist/"
-data_path: "D:\\YUE\\Datasets\\fmnist"
+data_path: "/mnt/ssd/Datasets/fmnist/"
+# data_path: "D:\\YUE\\Datasets\\fmnist"
 # dataset: "cifar10"
 # data_path: "/mnt/ssd/Datasets/cifar10/"
 

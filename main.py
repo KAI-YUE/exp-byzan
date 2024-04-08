@@ -29,9 +29,14 @@ def federated_learning(config, logger, record):
     test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=False)
     
     # craft a small validation dataset for the server 
-    subval = fetch_subset(dataset.dst_train, size=config.eva_size)
-    val_loader = fetch_dataloader(config, subval, shuffle=False)
-    
+    if config.eva_size > 0:
+        config.random_agg = False
+        subval = fetch_subset(dataset.dst_train, size=config.eva_size)
+        val_loader = fetch_dataloader(config, subval, shuffle=False)
+    else:
+        config.random_agg = True
+        val_loader = None
+
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
 
     # obtain the attacker data loader
@@ -207,22 +212,22 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
-        # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
-        # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
-        # # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
+        # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat",
+        # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
         # for windows
-        r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
+        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.30_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.50_0.dat",
-        r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
+        # r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
 
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.1/user_dataidx_map_0.10_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
-        # "/mnt/ex-ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
         # "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
@@ -239,20 +244,25 @@ def main():
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping"]
+    attackers = ["rop"]
+    attackers = ["omniscient_trapsetter"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc", "hybrid"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
+    aggregators = ["hybrid"]
 
-    num_attackers = [6, 10]
-    # num_attackers = [2, 6, 10, 14]
-    num_attackers = [2, 6, 10, 14]
-    # num_attackers = [14]
-    num_attackers = np.array([0., 0.1, 0.2, 0.3, 0.4])*30
+    # val_size = [10, 100]
+    val_size = [1000]
+
+    num_attackers = np.array([0.1, 0.2, 0.3, 0.4])*30
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
             for aggregator in aggregators:
+            # for size in val_size:
                 for num_att in num_attackers:
+
+                    # config.eva_size = size
 
                     # config.radius = r
                     config.user_data_mapping = user_data_mapping
