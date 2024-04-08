@@ -245,7 +245,7 @@ def main():
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
-    # attackers = []
+    attackers = ["rop", "omniscient_trapsetter"]
 
     # # radius = [0.3]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
