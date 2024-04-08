@@ -243,9 +243,8 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
     ]
 
-    attackers = ["alie", "ipm", "minmax", "signflipping"]
-    attackers = ["rop"]
-    attackers = ["omniscient_trapsetter"]
+    attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
+    # attackers = []
 
     # # radius = [0.3]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
