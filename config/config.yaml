@@ -93,12 +93,19 @@ model: "lenet_5"
 checkpoint_path: ""
 # checkpoint_path: "/home/kyue/expdata/byzantine/mr_models/0719_2303/checkpoint.pth"
 
+model: "harnet"
+# checkpoint_path: "/mnt/ssd/Projects/FL/HAR-Federated-Transfer-Learning-in-Pytorch/global_model/Global_CNN.pt"
+checkpoint_path: "D:/YUE/Datasets/har/Global_CNN.pt"
+
 # Simulation dataset configurations
 dataset: "fmnist"
 data_path: "/mnt/ssd/Datasets/fmnist/"
-# data_path: "D:\\YUE\\Datasets\\fmnist"
 # dataset: "cifar10"
 # data_path: "/mnt/ssd/Datasets/cifar10/"
+
+dataset: "uci_har"
+# data_path: "/mnt/ssd/Projects/FL/HAR-Federated-Transfer-Learning-in-Pytorch/data/"
+data_path: "D:/YUE/Datasets/har/"
 
 # DDP setup
 ddp: True
