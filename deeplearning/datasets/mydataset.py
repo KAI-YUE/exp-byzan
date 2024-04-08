@@ -25,8 +25,15 @@ class MyDataset(Dataset):
         return (image, label)
 
 def fetch_dataloader(config, data, shuffle=True):
+    # if "har" in config.dataset:
+    #     # if it is a list, we do not fetch the training set
+    #     if type(data) == list:
+    #         pass
+        
+    #     return None
+
     data_loader = DataLoader(MyDataset(data["images"], data["labels"]), 
-                        shuffle=shuffle, batch_size=config.batch_size)
+                shuffle=shuffle, batch_size=config.batch_size)
 
     return data_loader
 

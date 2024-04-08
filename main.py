@@ -88,7 +88,7 @@ def federated_learning(config, logger, record):
             benign_packages[user_id] = local_package
 
 
-        # =========== for local training 
+        # =========== for local training =========== 
         heterogeneities = [[] for i in range(len(dist_metrics))]
         loss_mat_arr = np.asarray(loss_mat)
         # after the training, we are able to calculate the empirical heterogeneity over loss
@@ -188,7 +188,6 @@ def federated_learning(config, logger, record):
 
     # logger.info("The empirical {:s} heterogeneity over loss is {:.3f}".format(config.dist_metric, heterogeneity))
     # record["heterogeneity"] = heterogeneity
-
 
     # if we consider total heterogeneity
     heterogeneities = total_heterogeneities
