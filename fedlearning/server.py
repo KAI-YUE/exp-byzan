@@ -21,7 +21,13 @@ class GlobalUpdater(object):
             self.hybrid = True
             agg_candidates = ["mean", "median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
             # agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-            self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates]
+            
+            # for ablation study, we may change the size of agg_candidates
+            idx_arr = np.arange(len(agg_candidates))
+            np.random.shuffle(idx_arr)
+            
+            # self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates]
+            self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates[:config.hybrid_size]]
             self.agg_candidates = agg_candidates
             
             # add rejection rule
@@ -55,7 +61,12 @@ class GlobalUpdater(object):
             val_acc = []
 
             for i, agg in enumerate(self.aggregators):
-                accumulated_delta = agg(benign_packages)
+                try:
+                    accumulated_delta = agg(benign_packages)
+                except:
+                    print("agg {:s} failed".format(self.agg_candidates[i]))
+                    continue
+                
                 global_weight = WeightBuffer(model.state_dict()) - accumulated_delta
                 model.load_state_dict(global_weight.state_dict())
             
