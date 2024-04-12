@@ -7,7 +7,7 @@ eva_size: 10
 
 
 # distributed settings
-rounds: 100
+rounds: 50
 total_users: 30
 num_attackers: 0
 part_rate: 1
@@ -62,6 +62,10 @@ rop_scaling_factor: 100
 lambda1: 1.
 lambda2: 10.
 
+attack_agnostic: True
+attack_agnostic: False
+swith_freq: 5
+
 # compressor
 compressor: "none"
 
@@ -95,8 +99,8 @@ model: "lenet_5"
 checkpoint_path: ""
 # checkpoint_path: "/home/kyue/expdata/byzantine/mr_models/0719_2303/checkpoint.pth"
 
-model: "harnet"
-checkpoint_path: "/mnt/ssd/Projects/FL/HAR-Federated-Transfer-Learning-in-Pytorch/global_model/Global_CNN.pt"
+# model: "harnet"
+# checkpoint_path: "/mnt/ssd/Projects/FL/HAR-Federated-Transfer-Learning-in-Pytorch/global_model/Global_CNN.pt"
 # checkpoint_path: "D:/YUE/Datasets/har/Global_CNN.pt"
 
 # Simulation dataset configurations
@@ -105,8 +109,8 @@ data_path: "/mnt/ssd/Datasets/fmnist/"
 # dataset: "cifar10"
 # data_path: "/mnt/ssd/Datasets/cifar10/"
 
-dataset: "uci_har"
-data_path: "/mnt/ssd/Projects/FL/HAR-Federated-Transfer-Learning-in-Pytorch/data/"
+# dataset: "uci_har"
+# data_path: "/mnt/ssd/Projects/FL/HAR-Federated-Transfer-Learning-in-Pytorch/data/"
 # data_path: "D:/YUE/Datasets/har/"
 
 # DDP setup

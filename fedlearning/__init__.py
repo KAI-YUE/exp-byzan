@@ -1,3 +1,3 @@
 from .server import GlobalUpdater
 from .client import LocalUpdater
-from .byzantine.initialize import init_attacker
+from .byzantine.initialize import init_attacker, update_attack
