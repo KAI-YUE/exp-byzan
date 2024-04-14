@@ -153,7 +153,7 @@ class NonOmniscientTrapSetter(Client):
 
         # settings for grid search
         self.steps = 2
-        self.distance = config.radius
+        self.distance = config.radius/self.steps
 
     def init_local_dataset(self, dataset, data_idx):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
