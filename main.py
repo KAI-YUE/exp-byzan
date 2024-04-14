@@ -222,7 +222,7 @@ def main():
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
         # for windows
-        r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
+        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.30_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.50_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
