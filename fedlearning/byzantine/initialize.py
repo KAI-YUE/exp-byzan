@@ -1,3 +1,5 @@
+import numpy as np
+
 from fedlearning.byzantine.signflipping import OmniscientSignflippingAttacker, SignflippingAttacker
 from fedlearning.byzantine.alie import AlieAttacker
 from fedlearning.byzantine.ipm import IPMAttacker
@@ -35,10 +37,19 @@ attacker_registry = {
     "dir_trap":                 DirTrapSetter,
 
     "benign":                   LocalUpdater,
-    "perturb":                  Perturb,
+    "perturb":                  Perturb, 
 }
 
 def init_attacker(config):
     attacker = attacker_registry[config.attacker_model]
 
     return attacker
+
+def update_attack(config, round, logger=None):
+    # if random attack, in each round we randomly pick one?
+    if config.attack_agnostic and round % config.swith_freq == 0:
+        candidates = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
+        config.attacker_model = np.random.choice(candidates)
+
+    # logger.info("Attacker model: ", config.attacker_model)
+    print("Attacker model: ", config.attacker_model)

@@ -13,6 +13,7 @@ from deeplearning.metric import metric_registry
 from fedlearning import *
 from fedlearning.aggregators import BenignFedAvg
 
+
 def federated_learning(config, logger, record):
     """Simulate Federated Learning training process. 
     
@@ -119,6 +120,8 @@ def federated_learning(config, logger, record):
         powerful = True
         # powerful = False
 
+        update_attack(config, comm_round)
+
         indices = []
         for i, attacker_id in enumerate(attacker_ids[:1]):
             indices.extend(user_data_mapping[attacker_id])
@@ -190,7 +193,7 @@ def federated_learning(config, logger, record):
     # record["heterogeneity"] = heterogeneity
 
     # if we consider total heterogeneity
-    heterogeneities = total_heterogeneities
+    heterogeneities = np.asarray(total_heterogeneities)
     for i, dist_metric in enumerate(metric_registry.keys()):
         mean_hetero = np.mean(heterogeneities[i])
         std_hetero = np.std(heterogeneities[i])
@@ -211,7 +214,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",

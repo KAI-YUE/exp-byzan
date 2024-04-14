@@ -62,6 +62,10 @@ rop_scaling_factor: 100
 lambda1: 1.
 lambda2: 10.
 
+attack_agnostic: True
+attack_agnostic: False
+swith_freq: 5
+
 # compressor
 compressor: "none"
 
