@@ -52,8 +52,9 @@ class OmniscientTrapSetter(Client):
         self.scaling_factor = config.scaling_factor
 
         # settings for grid search
-        self.steps = 5
+        self.steps = max(int(config.radius/0.01), 2)
         self.distance = config.radius
+
 
     def grid_search(self, network, data_loader, criterion):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
@@ -65,17 +66,17 @@ class OmniscientTrapSetter(Client):
             dir_one._weight_dict[w_name] = (dir_one._weight_dict[w_name]*cursor._weight_dict[w_name].norm()*self.distance)/(self.steps*dir_one._weight_dict[w_name].norm())
             dir_two._weight_dict[w_name] = (dir_two._weight_dict[w_name]*cursor._weight_dict[w_name].norm()*self.distance)/(self.steps*dir_two._weight_dict[w_name].norm())
 
-        dir_one, dir_two = dir_one*(self.steps/2), dir_two*(self.steps/2)
+        dir_one, dir_two = dir_one*(self.steps), dir_two*(self.steps)
         cursor = cursor - dir_one
         cursor = cursor - dir_two
-        dir_one, dir_two = dir_one*(2/self.steps), dir_two*(2/self.steps)
+        dir_one, dir_two = dir_one*(self.steps), dir_two*(self.steps)
         start_point = copy.deepcopy(cursor)
 
         data_matrix = []
-        for i in range(self.steps):
+        for i in range(2*self.steps + 1):
             data_column = []
 
-            for j in range(self.steps):
+            for j in range(2*self.steps + 1):
                 # column index corresponds to dir_two, row index corresponds to dir_one
                 # for every other column, reverse the order in which the column is generated
                 # so you can easily use in-place operations to move along dir_two
@@ -152,8 +153,8 @@ class NonOmniscientTrapSetter(Client):
         self.scaling_factor = config.scaling_factor
 
         # settings for grid search
-        self.steps = 2
-        self.distance = config.radius/self.steps
+        self.steps = max(int(config.radius/0.01), 2)
+        self.distance = config.radius
 
     def init_local_dataset(self, dataset, data_idx):
         subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
