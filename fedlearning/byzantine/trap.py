@@ -53,7 +53,8 @@ class OmniscientTrapSetter(Client):
 
         # settings for grid search
         self.steps = 5
-        self.distance = config.radius
+        self.distance = config.radius/self.steps
+
 
     def grid_search(self, network, data_loader, criterion):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
