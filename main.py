@@ -214,7 +214,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -251,7 +251,7 @@ def main():
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
     attackers =  ["nonomniscient_trapsetter"]
 
-    # # radius = [0.3]
+    radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
     aggregators = ["hybrid"]
 
@@ -259,22 +259,23 @@ def main():
     val_size = [100]
 
     num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
-    # num_attackers = np.array([0.1, 0.2])*30
+    num_attackers = np.array([0.4])*30
     # hybrid_sizes = np.array([3, 4, 5, 6])
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
-            for aggregator in aggregators:
+            # for aggregator in aggregators:
             # for size in val_size:
             # for hybrid_size in hybrid_sizes:
+            for r in radius:
                 for num_att in num_attackers:
                     # config.hybrid_size = hybrid_size
                     # config.eva_size = size
 
-                    # config.radius = r
+                    config.radius = r
                     config.user_data_mapping = user_data_mapping
                     config.attacker_model = attacker
-                    config.aggregator = aggregator
+                    # config.aggregator = aggregator
 
                     config.num_attackers = int(num_att)
 
