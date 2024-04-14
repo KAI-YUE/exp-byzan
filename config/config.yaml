@@ -3,11 +3,11 @@ device: cuda
 seed: 3002
 random_agg: True
 random_agg: False
-eva_size: 100
-hybrid_size: 3
+eva_size: 80
+hybrid_size: 6
 
 # distributed settings
-rounds: 100
+rounds: 50
 total_users: 30
 num_attackers: 0
 part_rate: 1

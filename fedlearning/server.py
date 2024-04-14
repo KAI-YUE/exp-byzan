@@ -27,7 +27,7 @@ class GlobalUpdater(object):
             np.random.shuffle(idx_arr)
             
             # self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates]
-            self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates[:config.hybrid_size]]
+            self.aggregators = [aggregator_registry[agg](config) for agg in agg_candidates[:config.hybrid_size+1]]
             self.agg_candidates = agg_candidates
             
             # add rejection rule
