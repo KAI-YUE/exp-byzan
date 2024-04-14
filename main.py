@@ -214,7 +214,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -249,7 +249,7 @@ def main():
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
-    attackers =  ["nonomniscient_trapsetter"]
+    attackers =  ["omniscient_trapsetter"]
 
     radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1]
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]

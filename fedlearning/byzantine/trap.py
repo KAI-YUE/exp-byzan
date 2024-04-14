@@ -56,7 +56,7 @@ class OmniscientTrapSetter(Client):
         self.distance = config.radius
 
 
-    def grid_search(self, network, data_loader, criterion):
+    def grid_search(self, network, data_loader, criterion, logger=None):
         dir_one = WeightBuffer(network.state_dict(), mode="rand")
         dir_two = WeightBuffer(network.state_dict(), mode="rand")
         cursor = WeightBuffer(network.state_dict(), mode="copy")
@@ -99,7 +99,7 @@ class OmniscientTrapSetter(Client):
         data_matrix = np.asarray(data_matrix)
         low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
         
-        print(low_acc_idx)
+        logger.info(low_acc_idx)
         dir_one, dir_two = dir_one*low_acc_idx[0], dir_two*low_acc_idx[1]
         start_point = start_point + dir_one
         start_point = start_point + dir_two
@@ -107,8 +107,8 @@ class OmniscientTrapSetter(Client):
         network.load_state_dict(start_point._weight_dict)
         acc, loss = test(data_loader, network, criterion, self.config)
 
-        print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
-        print("actual acc {:.3f}".format(acc))
+        logger.info("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
+        logger.info("actual acc {:.3f}".format(acc))
 
         return start_point
 
@@ -122,13 +122,15 @@ class OmniscientTrapSetter(Client):
                 self.target_w._weight_dict[w_name] = torch.rand_like(w)
 
     def local_step(self, oracle, network, data_loader, criterion, comm_round, **kwargs):
+        logger = kwargs.get("logger", None)
+        
         hypothetical_weight = self.w0 - oracle
 
         backup_weight = copy.deepcopy(network.state_dict())
         
         if comm_round % self.config.change_target_freq == 0:
             network.load_state_dict(hypothetical_weight.state_dict())
-            self.target_w = self.grid_search(network, data_loader, criterion)
+            self.target_w = self.grid_search(network, data_loader, criterion, logger)
             # torch.save({"state_dict": self.target_w.state_dict()}, "/mnt/ex-ssd/Projects/Attack/Byzan/checkpoints/test1.pth")
             # exit(0)
 
@@ -204,7 +206,7 @@ class NonOmniscientTrapSetter(Client):
         low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
         # low_acc_idx = np.unravel_index(np.argmax(data_matrix), data_matrix.shape)
 
-        print(low_acc_idx)
+        # logger.info(low_acc_idx)
         dir_one, dir_two = dir_one*low_acc_idx[0], dir_two*low_acc_idx[1]
         start_point = start_point + dir_one
         start_point = start_point + dir_two
@@ -212,9 +214,9 @@ class NonOmniscientTrapSetter(Client):
         network.load_state_dict(start_point._weight_dict)
         acc, loss = test(data_loader, network, criterion, self.config)
 
-        print("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
-        print("actual acc {:.3f}".format(acc))
-        print("Loss {:.3f}".format(loss))
+        logger.info("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
+        logger.info("actual acc {:.3f}".format(acc))
+        logger.info("Loss {:.3f}".format(loss))
 
         logger.info("Range: {:3f}".format(np.max(data_matrix.flatten()) - np.min(data_matrix.flatten())))
 
@@ -261,7 +263,7 @@ class NonOmniscientTrapSetter(Client):
         backup_weight = copy.deepcopy(network.state_dict())
 
         acc, loss = test(data_loader, network, criterion, self.config)
-        print("Initial acc: {:.3f}".format(acc))
+        logger.info("Initial acc: {:.3f}".format(acc))
 
         # approximate the oracle
         network.load_state_dict(self.target_w.state_dict())
