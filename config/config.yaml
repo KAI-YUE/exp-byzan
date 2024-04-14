@@ -106,7 +106,7 @@ checkpoint_path: ""
 # Simulation dataset configurations
 dataset: "fmnist"
 data_path: "/mnt/ssd/Datasets/fmnist/"
-# data_path: "D:/YUE/Datasets/fmnist"
+data_path: "D:/YUE/Datasets/fmnist"
 # dataset: "cifar10"
 # data_path: "/mnt/ssd/Datasets/cifar10/"
 

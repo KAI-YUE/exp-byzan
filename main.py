@@ -222,7 +222,7 @@ def main():
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
         # for windows
-        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_1.dat",
+        r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.30_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.50_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
@@ -249,19 +249,18 @@ def main():
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
-    attackers =  ["omniscient_trapsetter"]
-    # attackers = ["dir_trap"]
+    attackers =  ["nonomniscient_trapsetter"]
 
     # # radius = [0.3]
-    aggregators = ["median", "krum", "trimmed_mean" , "centeredclipping", "signguard", "dnc"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
     aggregators = ["hybrid"]
 
     # val_size = [10, 100]
     val_size = [100]
 
-    num_attackers = np.array([0.3, 0.4])*30
-    # num_attackers = [12]
-    # hybrid_sizes = np.array([5, 6])
+    num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
+    # num_attackers = np.array([0.1, 0.2])*30
+    # hybrid_sizes = np.array([3, 4, 5, 6])
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
