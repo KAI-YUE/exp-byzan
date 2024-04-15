@@ -214,7 +214,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -222,7 +222,7 @@ def main():
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
         # for windows
-        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
+        r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.30_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.50_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
@@ -249,17 +249,22 @@ def main():
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
-    attackers =  ["omniscient_trapsetter"]
+    attackers =  ["nonomniscient_trapsetter"]
 
+    scaling_factors = [1, 1.e-1, 1.e-2, 1.e-3, 1.e-4]
+    scaling_factors = [1.e-4]
+    radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1, 1, 3]
     radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1]
+
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-    aggregators = ["hybrid"]
+    aggregators = ["median"]
 
     # val_size = [10, 100]
     val_size = [100]
 
     num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
-    num_attackers = np.array([0.4])*30
+    num_attackers = np.array([0.1, 0.2, 0.3, 0.4])*30
+    num_attackers = [12]
     # hybrid_sizes = np.array([3, 4, 5, 6])
 
     for i, user_data_mapping in enumerate(user_data_mappings):
@@ -267,17 +272,20 @@ def main():
             # for aggregator in aggregators:
             # for size in val_size:
             # for hybrid_size in hybrid_sizes:
-            for r in radius:
-                for num_att in num_attackers:
+            for scaling_factor in scaling_factors:
+                for r in radius:
+                # for num_att in num_attackers:
                     # config.hybrid_size = hybrid_size
                     # config.eva_size = size
 
                     config.radius = r
+                    config.scaling_factor = scaling_factor
+
                     config.user_data_mapping = user_data_mapping
                     config.attacker_model = attacker
                     # config.aggregator = aggregator
 
-                    config.num_attackers = int(num_att)
+                    # config.num_attackers = int(num_att)
 
                     output_dir = init_outputfolder(config)
                     logger = init_logger(config, output_dir, config.seed)

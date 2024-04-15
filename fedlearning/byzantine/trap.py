@@ -52,7 +52,8 @@ class OmniscientTrapSetter(Client):
         self.scaling_factor = config.scaling_factor
 
         # settings for grid search
-        self.steps = max(int(config.radius/0.01), 2)
+        # self.steps = max(int(config.radius/0.01), 2)
+        self.steps = 2
         self.distance = config.radius
 
 
@@ -155,7 +156,8 @@ class NonOmniscientTrapSetter(Client):
         self.scaling_factor = config.scaling_factor
 
         # settings for grid search
-        self.steps = max(int(config.radius/0.01), 2)
+        # self.steps = max(int(config.radius/0.01), 2)
+        self.steps = 2
         self.distance = config.radius
 
     def init_local_dataset(self, dataset, data_idx):
