@@ -41,8 +41,9 @@ def federated_learning(config, logger, record):
     model, criterion, user_ids, attacker_ids, user_data_mapping, start_round = init_all(config, dataset, logger)
 
     # obtain the attacker data loader
-    attacker_data_loader = fetch_attacker_dataloader(config, dataset.dst_train, attacker_ids, user_data_mapping)
+    # attacker_data_loader = fetch_attacker_dataloader(config, dataset.dst_train, attacker_ids, user_data_mapping)
     # attacker_data_loader = test_loader
+    attacker_data_loader = fetch_attacker_dataloader(config, dataset.dst_train, user_ids[:config.cutoff], user_data_mapping)
 
     # distance measure for losses 
     # dist_metric = metric_registry[config.dist_metric]
@@ -142,15 +143,15 @@ def federated_learning(config, logger, record):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, indices)
 
-            # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-            #                    data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
-            #                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
-            
             traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-                    data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
-                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
+                               data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
+                               momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+                               attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            
+            # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+            #         data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
+            #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
             
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
             #         data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
@@ -214,7 +215,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_1.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -251,7 +252,12 @@ def main():
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
     attackers =  ["omniscient_trapsetter"]
 
-    radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1]
+    scaling_factors = [1, 1.e-1, 1.e-2, 1.e-3, 1.e-4]
+    scaling_factors = [1.e-4]
+    radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1, 1, 3]
+    radius = [1, 3]
+    cutoff_size = [4, 8, 12]
+    
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
     aggregators = ["hybrid"]
 
@@ -264,15 +270,21 @@ def main():
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
+            for cutoff in cutoff_size:
             # for aggregator in aggregators:
             # for size in val_size:
             # for hybrid_size in hybrid_sizes:
-            for r in radius:
+            # for scaling_factor in scaling_factors:
+            #     for r in radius:
                 for num_att in num_attackers:
                     # config.hybrid_size = hybrid_size
                     # config.eva_size = size
 
-                    config.radius = r
+                    # config.radius = r
+                    # config.scaling_factor = scaling_factor
+
+                    config.cutoff = cutoff
+
                     config.user_data_mapping = user_data_mapping
                     config.attacker_model = attacker
                     # config.aggregator = aggregator

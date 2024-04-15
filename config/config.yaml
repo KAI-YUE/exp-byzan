@@ -3,13 +3,14 @@ device: cuda
 seed: 3002
 random_agg: True
 random_agg: False
-eva_size: 80
-hybrid_size: 6
+eva_size: 120
+hybrid_size: 7
+cutoff: 5
 
 # distributed settings
-rounds: 50
+rounds: 25
 total_users: 30
-num_attackers: 0
+num_attackers: 12
 part_rate: 1
 user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/a0.5/user_dataidx_map_0.50_0.dat"
 # user_data_mapping: "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.2_0.dat"
@@ -31,7 +32,8 @@ model_checkpoint: " "
 # model_checkpoint: ""
 # attacker_model: "max_h"
 scaling_factor: 1.e-2
-radius: 3.e-2
+scaling_factor: 1.e-3
+radius: 3.e-1
 change_target_freq: 1
 
 maxh_trial: 5
@@ -86,6 +88,7 @@ store_momentum: True
 
 # aggregator: "vote"
 global_lr: 1.
+# aggregator: "median"
 
 batch_size: 100
 tau: 20

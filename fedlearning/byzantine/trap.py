@@ -52,7 +52,8 @@ class OmniscientTrapSetter(Client):
         self.scaling_factor = config.scaling_factor
 
         # settings for grid search
-        self.steps = max(int(config.radius/0.01), 2)
+        # self.steps = max(int(config.radius/0.01), 2)
+        self.steps = 2
         self.distance = config.radius
 
 
@@ -72,6 +73,8 @@ class OmniscientTrapSetter(Client):
         dir_one, dir_two = dir_one*(self.steps), dir_two*(self.steps)
         start_point = copy.deepcopy(cursor)
 
+
+        # for ablation study, we may randomly choose one index
         data_matrix = []
         for i in range(2*self.steps + 1):
             data_column = []
@@ -99,6 +102,8 @@ class OmniscientTrapSetter(Client):
         data_matrix = np.asarray(data_matrix)
         low_acc_idx = np.unravel_index(np.argmin(data_matrix), data_matrix.shape)
         
+        # low_acc_idx = [np.random.randint(2*self.steps+1), np.random.randint(2*self.steps+1)]
+
         logger.info(low_acc_idx)
         dir_one, dir_two = dir_one*low_acc_idx[0], dir_two*low_acc_idx[1]
         start_point = start_point + dir_one
@@ -107,8 +112,8 @@ class OmniscientTrapSetter(Client):
         network.load_state_dict(start_point._weight_dict)
         acc, loss = test(data_loader, network, criterion, self.config)
 
-        logger.info("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
-        logger.info("actual acc {:.3f}".format(acc))
+        # logger.info("Target_low_acc {:.3f}".format(np.min(data_matrix.flatten())))
+        # logger.info("actual acc {:.3f}".format(acc))
 
         return start_point
 
@@ -155,7 +160,8 @@ class NonOmniscientTrapSetter(Client):
         self.scaling_factor = config.scaling_factor
 
         # settings for grid search
-        self.steps = max(int(config.radius/0.01), 2)
+        # self.steps = max(int(config.radius/0.01), 2)
+        self.steps = 2
         self.distance = config.radius
 
     def init_local_dataset(self, dataset, data_idx):

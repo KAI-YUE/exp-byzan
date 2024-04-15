@@ -61,7 +61,7 @@ def save_checkpoint(state, path):
     torch.save(state, path)
 
 
-def test(test_loader, network, criterion, config):
+def test(test_loader, network, criterion, config, cutoff=None):
     batch_time = AverageMeter('Time', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
     accuracy_meter = AverageMeter('Accs', ':6.2f')
@@ -71,6 +71,7 @@ def test(test_loader, network, criterion, config):
     network.no_grad = True
 
     end = time.time()
+    acc_sample = 0
     for i, data in enumerate(test_loader):
         input, target = data[0], data[1]
 
@@ -91,6 +92,10 @@ def test(test_loader, network, criterion, config):
         # Measure elapsed time
         batch_time.update(time.time() - end)
         end = time.time()
+
+        acc_sample += input.size(0)
+        if cutoff is not None and acc_sample >= cutoff:
+            break
 
     network.no_grad = False
     network.train()

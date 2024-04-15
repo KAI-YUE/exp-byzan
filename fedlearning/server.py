@@ -20,7 +20,7 @@ class GlobalUpdater(object):
         if config.aggregator == "hybrid":
             self.hybrid = True
             agg_candidates = ["mean", "median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-            # agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
+            agg_candidates = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
             
             # for ablation study, we may change the size of agg_candidates
             idx_arr = np.arange(len(agg_candidates))
