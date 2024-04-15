@@ -3,14 +3,9 @@ device: cuda
 seed: 3002
 random_agg: True
 random_agg: False
-<<<<<<< HEAD
 eva_size: 120
 hybrid_size: 7
 cutoff: 5
-=======
-eva_size: 100
-hybrid_size: 7
->>>>>>> 35e4d046274d005b07a605b0090270588db20d3b
 
 # distributed settings
 rounds: 25
@@ -38,11 +33,7 @@ model_checkpoint: " "
 # attacker_model: "max_h"
 scaling_factor: 1.e-2
 scaling_factor: 1.e-3
-<<<<<<< HEAD
 radius: 3.e-1
-=======
-radius: 1.e-1
->>>>>>> 35e4d046274d005b07a605b0090270588db20d3b
 change_target_freq: 1
 
 maxh_trial: 5
@@ -97,11 +88,7 @@ store_momentum: True
 
 # aggregator: "vote"
 global_lr: 1.
-<<<<<<< HEAD
-# aggregator: "median"
-=======
-# aggregator: "trimmed_mean"
->>>>>>> 35e4d046274d005b07a605b0090270588db20d3b
+aggregator: "dnc"
 
 batch_size: 100
 tau: 20
@@ -122,7 +109,7 @@ checkpoint_path: ""
 # Simulation dataset configurations
 dataset: "fmnist"
 data_path: "/mnt/ssd/Datasets/fmnist/"
-data_path: "D:/YUE/Datasets/fmnist"
+# data_path: "D:/YUE/Datasets/fmnist"
 # dataset: "cifar10"
 # data_path: "/mnt/ssd/Datasets/cifar10/"
 

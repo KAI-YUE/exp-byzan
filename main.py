@@ -215,11 +215,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-<<<<<<< HEAD
         "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_1.dat",
-=======
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat",
->>>>>>> 35e4d046274d005b07a605b0090270588db20d3b
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -227,7 +223,7 @@ def main():
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.6/user_dataidx_map_0.60_0.dat"
         
         # for windows
-        r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
+        # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.10_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.30_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\a0.1\user_dataidx_map_0.50_0.dat",
         # r"D:\YUE\Datasets\user_with_data\fmnist\iid\iid_mapping_0.dat",
@@ -257,21 +253,15 @@ def main():
     attackers =  ["nonomniscient_trapsetter"]
 
     scaling_factors = [1, 1.e-1, 1.e-2, 1.e-3, 1.e-4]
-    scaling_factors = [1.e-4]
     radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1, 1, 3]
-<<<<<<< HEAD
-    radius = [1, 3]
-    cutoff_size = [4, 8, 12]
-    
-=======
-    radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1]
 
->>>>>>> 35e4d046274d005b07a605b0090270588db20d3b
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
     aggregators = ["median"]
 
     # val_size = [10, 100]
     val_size = [100]
+
+    cutoff_size = [4, 8, 12]
 
     num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
     num_attackers = np.array([0.1, 0.2, 0.3, 0.4])*30
@@ -284,7 +274,6 @@ def main():
             # for aggregator in aggregators:
             # for size in val_size:
             # for hybrid_size in hybrid_sizes:
-<<<<<<< HEAD
             # for scaling_factor in scaling_factors:
             #     for r in radius:
                 for num_att in num_attackers:
@@ -295,16 +284,6 @@ def main():
                     # config.scaling_factor = scaling_factor
 
                     config.cutoff = cutoff
-=======
-            for scaling_factor in scaling_factors:
-                for r in radius:
-                # for num_att in num_attackers:
-                    # config.hybrid_size = hybrid_size
-                    # config.eva_size = size
-
-                    config.radius = r
-                    config.scaling_factor = scaling_factor
->>>>>>> 35e4d046274d005b07a605b0090270588db20d3b
 
                     config.user_data_mapping = user_data_mapping
                     config.attacker_model = attacker
