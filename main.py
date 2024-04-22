@@ -60,6 +60,7 @@ def federated_learning(config, logger, record):
     # loss_mat = np.zeros((config.total_users-config.num_attackers, config.rounds))
     loss_mat = []
     total_heterogeneities = []
+    # number of benign users
     for i in range(config.total_users - config.num_attackers):
         loss_mat.append([])
         total_heterogeneities.append([])
@@ -94,10 +95,12 @@ def federated_learning(config, logger, record):
         heterogeneities = [[] for i in range(len(dist_metrics))]
         loss_mat_arr = np.asarray(loss_mat)
         # after the training, we are able to calculate the empirical heterogeneity over loss
+        # loss_mat_arr: (num_users, num_local_steps)
+        # measures the distance between trajectories over local iterations
         for ii in range(loss_mat_arr.shape[0]):
             for jj in range(ii+1, loss_mat_arr.shape[0]):
                 for kk in range(len(dist_metrics)):
-                    heterogeneities[kk].append(dist_metrics[kk](loss_mat_arr[ii], loss_mat_arr[jj]))
+                    heterogeneities[kk].append(dist_metrics[kk](loss_mat_arr[ii], loss_mat_arr[jj])) # pair-wise distance
 
         logger.info("median \t mean \t std \t variation")
         for l, dist_metric in enumerate(metric_registry.keys()):
@@ -143,15 +146,15 @@ def federated_learning(config, logger, record):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, indices)
 
-            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-                               data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
-                               momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-                               attacker_loss_traj=traj, powerful=powerful, logger=logger)
-            
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-            #         data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
-            #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            #                    data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
+            #                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+            #                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            
+            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+                    data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
+                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
             
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
             #         data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
@@ -193,14 +196,25 @@ def federated_learning(config, logger, record):
     # logger.info("The empirical {:s} heterogeneity over loss is {:.3f}".format(config.dist_metric, heterogeneity))
     # record["heterogeneity"] = heterogeneity
 
-    # if we consider total heterogeneity
+    # if we consider total heterogeneity [global heterogeneity], 
+    # (num_client, num_rounds), since each client reports 1 value per round 
     heterogeneities = np.asarray(total_heterogeneities)
-    for i, dist_metric in enumerate(metric_registry.keys()):
-        mean_hetero = np.mean(heterogeneities[i])
-        std_hetero = np.std(heterogeneities[i])
-        median_hetero = np.median(heterogeneities[i])
-        variation = std_hetero/mean_hetero
-        logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+    heterogeneities_mean = np.zeros(3)
+    for ii in range(loss_mat_arr.shape[0]):
+        for jj in range(ii+1, loss_mat_arr.shape[0]):
+            for kk in range(len(dist_metrics)):
+                heterogeneities_mean[kk] += dist_metrics[kk](heterogeneities[ii], heterogeneities[jj])
+    
+    for kk, dist_metric in enumerate(metric_registry.keys()):
+        heterogeneities_mean[kk] /= (loss_mat_arr.shape[0]*(loss_mat_arr.shape[0]-1))/2
+        logger.info("{:s}\t\t {:.3e}\t".format(dist_metric, heterogeneities_mean[kk]))
+
+    # for i, dist_metric in enumerate(metric_registry.keys()):
+    #     mean_hetero = np.mean(heterogeneities[i])
+    #     std_hetero = np.std(heterogeneities[i])
+    #     median_hetero = np.median(heterogeneities[i])
+    #     variation = std_hetero/mean_hetero
+    #     logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
 
     heterogeneities_mean = np.asarray(heterogeneities_mean)
     heterogeneities_std = np.asarray(heterogeneities_std)
@@ -215,7 +229,7 @@ def main():
     # load the config file, logger, and initialize the output folder
     config = load_config()
     user_data_mappings = [
-        "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_1.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_1.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.2/user_dataidx_map_0.20_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.3/user_dataidx_map_0.30_0.dat",
         # # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.4/user_dataidx_map_0.40_0.dat",
@@ -240,10 +254,10 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
     
         # r"D:\YUE\Datasets\user_with_data\uci_har\user_dataidx_map_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/uci_har/user_dataidx_map_0.dat"
