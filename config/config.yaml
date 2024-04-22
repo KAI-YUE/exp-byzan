@@ -8,7 +8,7 @@ hybrid_size: 7
 cutoff: 5
 
 # distributed settings
-rounds: 25
+rounds: 5
 total_users: 30
 num_attackers: 12
 part_rate: 1

@@ -143,15 +143,15 @@ def federated_learning(config, logger, record):
             updater = ByzantineUpdater(config, model)
             updater.init_local_dataset(dataset, indices)
 
-            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-                               data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
-                               momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-                               attacker_loss_traj=traj, powerful=powerful, logger=logger)
-            
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
-            #         data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
-            #         momentum=global_updater.momentum, reference_attacker=reference_attacker, 
-            #         attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            #                    data_loader=attacker_data_loader, criterion=criterion, comm_round=comm_round, 
+            #                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+            #                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
+            
+            traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
+                    data_loader=test_loader, criterion=criterion, comm_round=comm_round, 
+                    momentum=global_updater.momentum, reference_attacker=reference_attacker, 
+                    attacker_loss_traj=traj, powerful=powerful, logger=logger)
             
             # traj = updater.local_step(benign_packages=benign_packages, oracle=oracle, network=model, 
             #         data_loader=updater.data_loader, criterion=criterion, comm_round=comm_round, 
@@ -196,9 +196,9 @@ def federated_learning(config, logger, record):
     # if we consider total heterogeneity
     heterogeneities = np.asarray(total_heterogeneities)
     for i, dist_metric in enumerate(metric_registry.keys()):
-        mean_hetero = np.mean(heterogeneities[i])
-        std_hetero = np.std(heterogeneities[i])
-        median_hetero = np.median(heterogeneities[i])
+        mean_hetero = np.mean(heterogeneities)
+        std_hetero = np.std(heterogeneities)
+        median_hetero = np.median(heterogeneities)
         variation = std_hetero/mean_hetero
         logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
 
@@ -265,13 +265,13 @@ def main():
 
     num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
     num_attackers = np.array([0.1, 0.2, 0.3, 0.4])*30
-    num_attackers = [12]
+    # num_attackers = [12]
     # hybrid_sizes = np.array([3, 4, 5, 6])
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
-            for cutoff in cutoff_size:
-            # for aggregator in aggregators:
+            for aggregator in aggregators:
+            # for cutoff in cutoff_size:
             # for size in val_size:
             # for hybrid_size in hybrid_sizes:
             # for scaling_factor in scaling_factors:
@@ -283,13 +283,13 @@ def main():
                     # config.radius = r
                     # config.scaling_factor = scaling_factor
 
-                    config.cutoff = cutoff
+                    # config.cutoff = cutoff
 
                     config.user_data_mapping = user_data_mapping
                     config.attacker_model = attacker
-                    # config.aggregator = aggregator
+                    config.aggregator = aggregator
 
-                    # config.num_attackers = int(num_att)
+                    config.num_attackers = int(num_att)
 
                     output_dir = init_outputfolder(config)
                     logger = init_logger(config, output_dir, config.seed)
