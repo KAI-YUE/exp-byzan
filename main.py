@@ -68,7 +68,6 @@ def federated_learning(config, logger, record):
     best_testacc = 0.
     heterogeneities_mean, heterogeneities_std = [[] for i in range(len(dist_metrics))], [[] for i in range(len(dist_metrics))] 
 
-
     # ref = None
     for comm_round in range(start_round, config.rounds):
         benign_packages = {}
@@ -111,8 +110,10 @@ def federated_learning(config, logger, record):
             
             heterogeneities_mean[l].append(mean_hetero)
             heterogeneities_std[l].append(std_hetero)
+
+            max_hetero = np.max(heterogeneities[l])
            
-            logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, median_hetero, mean_hetero, std_hetero, variation))
+            logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, mean_hetero, max_hetero, std_hetero, variation))
 
 
 
@@ -199,7 +200,7 @@ def federated_learning(config, logger, record):
     # if we consider total heterogeneity [global heterogeneity], 
     # (num_client, num_rounds), since each client reports 1 value per round 
     heterogeneities = np.asarray(total_heterogeneities)
-    heterogeneities_mean = np.zeros(3)
+    heterogeneities_mean = np.zeros(4)
     for ii in range(loss_mat_arr.shape[0]):
         for jj in range(ii+1, loss_mat_arr.shape[0]):
             for kk in range(len(dist_metrics)):
@@ -246,7 +247,7 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
-        # "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
 
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
@@ -254,23 +255,23 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.05/user_dataidx_map_0.05_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.1/user_dataidx_map_0.10_0.dat"
 
-        "/mnt/ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
-        "/mnt/ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
-        "/mnt/ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
-        "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k2/user_dataidx_map_2_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k4/user_dataidx_map_4_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k6/user_dataidx_map_6_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/k8/user_dataidx_map_8_0.dat",
     
         # r"D:\YUE\Datasets\user_with_data\uci_har\user_dataidx_map_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/uci_har/user_dataidx_map_0.dat"
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
-    attackers =  ["nonomniscient_trapsetter"]
+    attackers = ["ipm"]
 
     scaling_factors = [1, 1.e-1, 1.e-2, 1.e-3, 1.e-4]
     radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1, 1, 3]
 
     aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-    aggregators = ["median"]
+    aggregators = ["hybrid"]
 
     # val_size = [10, 100]
     val_size = [100]
@@ -279,31 +280,36 @@ def main():
 
     num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
     num_attackers = np.array([0.1, 0.2, 0.3, 0.4])*30
-    num_attackers = [12]
+    num_attackers = [3, 6, 9, 12]
     # hybrid_sizes = np.array([3, 4, 5, 6])
+
+    ipm_params = [0.1, 1, 10, 100]
 
     for i, user_data_mapping in enumerate(user_data_mappings):
         for attacker in attackers:
-            for cutoff in cutoff_size:
-            # for aggregator in aggregators:
+            # for cutoff in cutoff_size:
+            for aggregator in aggregators:
             # for size in val_size:
             # for hybrid_size in hybrid_sizes:
             # for scaling_factor in scaling_factors:
             #     for r in radius:
-                for num_att in num_attackers:
+                for ipm_multiplier in ipm_params:
+                # for num_att in num_attackers:
                     # config.hybrid_size = hybrid_size
                     # config.eva_size = size
 
                     # config.radius = r
                     # config.scaling_factor = scaling_factor
 
-                    config.cutoff = cutoff
+                    # config.cutoff = cutoff
 
                     config.user_data_mapping = user_data_mapping
                     config.attacker_model = attacker
-                    # config.aggregator = aggregator
+                    config.aggregator = aggregator
 
                     # config.num_attackers = int(num_att)
+
+                    config.ipm_multiplier = ipm_multiplier
 
                     output_dir = init_outputfolder(config)
                     logger = init_logger(config, output_dir, config.seed)
