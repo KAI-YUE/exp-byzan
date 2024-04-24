@@ -32,8 +32,14 @@ def fetch_dataloader(config, data, shuffle=True):
         
     #     return None
 
-    data_loader = DataLoader(MyDataset(data["images"], data["labels"]), 
-                shuffle=shuffle, batch_size=config.batch_size)
+    if "cifar" in config.dataset:
+        data_loader = DataLoader(data, 
+                    batch_size=config.batch_size, shuffle=True,
+                    num_workers=config.workers, pin_memory=False)
+    
+    else:
+        data_loader = DataLoader(MyDataset(data["images"], data["labels"]), 
+                    shuffle=shuffle, batch_size=config.batch_size)
 
     return data_loader
 
@@ -46,7 +52,15 @@ def fetch_attacker_dataloader(config, data, attacker_ids, user_data_mapping, shu
     for i, id in enumerate(attacker_ids):
         data_idx.extend(user_data_mapping[id]) 
 
-    data_loader = DataLoader(MyDataset(data["images"][data_idx], data["labels"][data_idx]),
-                        shuffle=shuffle, batch_size=config.batch_size)
+
+    if "cifar" in config.dataset:
+        subset = torch.utils.data.Subset(data, data_idx)
+        data_loader = DataLoader(subset, 
+                    batch_size=config.batch_size, shuffle=True,
+                    num_workers=config.workers, pin_memory=False)
+    
+    else:
+        data_loader = DataLoader(MyDataset(data["images"][data_idx], data["labels"][data_idx]),
+                            shuffle=shuffle, batch_size=config.batch_size)
 
     return data_loader

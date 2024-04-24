@@ -57,7 +57,14 @@ class LocalUpdater(Client):
         super(LocalUpdater, self).__init__(config, model, **kwargs)
 
     def init_local_dataset(self, dataset, data_idx):
-        subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
+        
+        if "cifar" in self.config.dataset:
+            subset = torch.utils.data.Subset(dataset.dst_train, data_idx)
+        
+        else:
+            subset = {"images":dataset.dst_train['images'][data_idx], "labels":dataset.dst_train['labels'][data_idx]}
+        
+        
         self.data_loader = fetch_dataloader(self.config, subset, shuffle=True)
 
     def local_step(self, criterion, **kwargs):

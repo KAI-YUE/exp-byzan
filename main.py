@@ -27,7 +27,7 @@ def federated_learning(config, logger, record):
     # initialize the dataset and dataloader for training and testing 
     dataset = fetch_dataset(config)
     dummy_train_loader = fetch_dataloader(config, dataset.dst_train)
-    test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=False)
+    test_loader = fetch_dataloader(config, dataset.dst_test, shuffle=True)
     
     # craft a small validation dataset for the server 
     if config.eva_size > 0:
@@ -72,6 +72,9 @@ def federated_learning(config, logger, record):
     for comm_round in range(start_round, config.rounds):
         benign_packages = {}
         for i, user_id in enumerate(user_ids):
+
+            print("Round: ", comm_round, "User: ", i)
+
             updater = LocalUpdater(config, model)
             updater.init_local_dataset(dataset, user_data_mapping[user_id])
             # local_loss, local_acc = updater.local_step(criterion)
@@ -114,7 +117,6 @@ def federated_learning(config, logger, record):
             max_hetero = np.max(heterogeneities[l])
            
             logger.info("{:s}\t\t {:.3e}\t {:.3e}\t {:.3e} \t {:.3e}".format(dist_metric, mean_hetero, max_hetero, std_hetero, variation))
-
 
 
         # =============================================
@@ -247,7 +249,7 @@ def main():
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.3/user_dataidx_map_0.30_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a0.5/user_dataidx_map_0.50_0.dat",
 
-        "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
+        # "/mnt/ssd/Datasets/user_with_data/fmnist/iid/iid_mapping_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/fmnist/byzantine/a100/user_dataidx_map_100_1.dat"
 
         # "/mnt/ssd/Datasets/user_with_data/fmnist/a0.01/user_dataidx_map_0.01_0.dat",
@@ -262,26 +264,26 @@ def main():
     
         # r"D:\YUE\Datasets\user_with_data\uci_har\user_dataidx_map_0.dat",
         # "/mnt/ssd/Datasets/user_with_data/uci_har/user_dataidx_map_0.dat"
+
+        # "/mnt/ssd/Datasets/user_with_data/cifar/iid/iid_mapping_0.dat",
+        "/mnt/ssd/Datasets/user_with_data/cifar/a0.1/user_dataidx_map_0.10_0.dat"
     ]
 
     attackers = ["alie", "ipm", "minmax", "signflipping", "rop", "omniscient_trapsetter"]
-    attackers = ["ipm"]
+    attackers = ["signflipping", "rop", "omniscient_trapsetter"]
 
     scaling_factors = [1, 1.e-1, 1.e-2, 1.e-3, 1.e-4]
     radius = [3.e-3, 1.e-2, 3.e-2,  1.e-1, 3.e-1, 1, 3]
 
-    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc"]
-    aggregators = ["hybrid"]
+    aggregators = ["median", "krum", "trimmed_mean" ,"centeredclipping", "signguard", "dnc", "hybrid"]
+    # aggregators = ["trimmed_mean"]
 
     # val_size = [10, 100]
     val_size = [100]
 
     cutoff_size = [4, 8, 12]
 
-    num_attackers = np.array([0, 0.1, 0.2, 0.3, 0.4])*30
     num_attackers = np.array([0.1, 0.2, 0.3, 0.4])*30
-    num_attackers = [3, 6, 9, 12]
-    # hybrid_sizes = np.array([3, 4, 5, 6])
 
     ipm_params = [0.1, 1, 10, 100]
 
@@ -293,8 +295,8 @@ def main():
             # for hybrid_size in hybrid_sizes:
             # for scaling_factor in scaling_factors:
             #     for r in radius:
-                for ipm_multiplier in ipm_params:
-                # for num_att in num_attackers:
+                # for ipm_multiplier in ipm_params:
+                for num_att in num_attackers:
                     # config.hybrid_size = hybrid_size
                     # config.eva_size = size
 
@@ -307,9 +309,9 @@ def main():
                     config.attacker_model = attacker
                     config.aggregator = aggregator
 
-                    # config.num_attackers = int(num_att)
+                    config.num_attackers = int(num_att)
 
-                    config.ipm_multiplier = ipm_multiplier
+                    # config.ipm_multiplier = ipm_multiplier
 
                     output_dir = init_outputfolder(config)
                     logger = init_logger(config, output_dir, config.seed)

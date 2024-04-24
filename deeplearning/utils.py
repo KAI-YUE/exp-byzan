@@ -97,6 +97,9 @@ def test(test_loader, network, criterion, config, cutoff=None):
         if cutoff is not None and acc_sample >= cutoff:
             break
 
+        if i > 20:  # only test 20 batches
+            break
+
     network.no_grad = False
     network.train()
 
@@ -107,7 +110,8 @@ def validate_and_log(config, model, train_loader, test_loader, criterion, comm_r
     logger.info("-"*50)
     logger.info("Communication Round {:d}".format(comm_round))
 
-    trainacc, train_loss = test(train_loader, model, criterion, config)
+    # trainacc, train_loss = test(train_loader, model, criterion, config)
+    trainacc, train_loss = 0, 0  # skip for now
     testacc, test_loss = test(test_loader, model, criterion, config)
 
     # remember best prec@1 and save checkpoint
